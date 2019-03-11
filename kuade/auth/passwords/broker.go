@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"text/template"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/kuade/auth"
-	"github.com/thatique/kuade/kuade/auth/notifications"
-	"github.com/thatique/kuade/kuade/auth/tokens"
+	"github.com/thatique/kuade/kuade/auth/passwords/notifications"
+	"github.com/thatique/kuade/kuade/auth/passwords/tokens"
 	"github.com/thatique/kuade/pkg/emailparser"
 )
 
@@ -47,10 +48,10 @@ type Broker struct {
 	Message  string
 	store    auth.UserStore
 	token    tokens.TokenGenerator
-	notifier notification.Notifier
+	notifier notifications.Notifier
 }
 
-func NewBroker(t tokens.TokenGenerator, n notification.Notifier, store auth.UserStore) *Broker {
+func NewBroker(t tokens.TokenGenerator, n notifications.Notifier, store auth.UserStore) *Broker {
 	return &Broker{store: store, token: t, notifier: n,}
 }
 
@@ -81,8 +82,7 @@ func (b *Broker) SendResetLink(ctx context.Context, ip string, email string) err
 	uid := base64.RawURLEncoding.EncodeToString([]byte(user.Id))
 	link := fmt.Sprintf("%s/%s/%s", b.ResetURL, uid, token)
 
-	t := template.Must(template.New("reset").Parse(b.Message))
-	w, r := io.Pipe()
+	r, w := io.Pipe()
 	go func() {
 		defer w.Close()
 		t := template.Must(template.New("reset").Parse(b.Message))
@@ -104,7 +104,7 @@ func (b *Broker) Resets(req *ResetRequest, fn func(user *auth.User, pswd string)
 		return ErrPassNotMatch
 	}
 
-	if req.user.Type == auth.USER_TYPE_STAFF && len(req.Password1) < 15 {
+	if req.user.Role == auth.ROLE_STAFF && len(req.Password1) < 15 {
 		return ErrMinimumStaffPassLen
 	}
 
@@ -130,7 +130,7 @@ func (b *Broker) ValidateReset(ctx context.Context, uid, token string) (req *Res
 		return
 	}
 
-	objectid, ok = b.validateUid(uid)
+	objectid, ok := b.validateUid(uid)
 	if !ok {
 		ok = false
 		return
@@ -142,9 +142,9 @@ func (b *Broker) ValidateReset(ctx context.Context, uid, token string) (req *Res
 		return
 	}
 
-	req := &ResetRequest{user: user,}
+	req = &ResetRequest{user: user,}
 
-	ok := b.token.IsValid(user, token)
+	ok = b.token.IsValid(user, token)
 	if !ok {
 		ok = false
 		return

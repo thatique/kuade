@@ -1,4 +1,4 @@
-package redistoken
+package redis
 
 import (
 	"crypto/subtle"
@@ -51,7 +51,7 @@ func (t *RedisToken) Generate(user *auth.User) (token string, err error) {
 		return "", err
 	}
 
-	token, err := tokens.GenerateToken()
+	token, err = tokens.GenerateToken()
 	if err != nil {
 		return "", err
 	}
@@ -89,8 +89,8 @@ func (t *RedisToken) Delete(token string) error {
 
 	conn.Send("MULTI")
 	conn.Send("DEL", tok)
-	conn.SEND("DEL", key)
-	_, err := conn.Do("EXEC")
+	conn.Send("DEL", key)
+	_, err = conn.Do("EXEC")
 
 	return err
 }

@@ -1,6 +1,7 @@
-package emailnotification
+package email
 
 import (
+	"io"
 	"net/mail"
 
 	"github.com/emersion/go-message"

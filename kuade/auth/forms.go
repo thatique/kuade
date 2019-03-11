@@ -42,7 +42,7 @@ func (form *SigninForm) Validate() (user *User, err map[string]string, ok bool) 
 		return
 	}
 
-	if !user.VerifyPassword(form.Password) {
+	if !user.VerifyPassword([]byte(form.Password)) {
 		ok = false
 		err["email_password"] = "email atau password anda keliru"
 		return
