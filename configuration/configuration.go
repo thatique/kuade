@@ -98,14 +98,25 @@ type Configuration struct {
 		// Strict-Transport-Security. The map keys are the header names, and
 		// the values are the associated header payloads.
 		Headers http.Header `yaml:"headers,omitempty"`
+
+		// Debug configures the http debug interface, if specified. This can
+		// include services such as pprof, expvar and other data that should
+		// not be exposed externally. Left disabled by default.
+		Debug struct {
+			// Addr specifies the bind address for the debug server.
+			Addr string `yaml:"addr,omitempty"`
+			// Prometheus configures the Prometheus telemetry endpoint.
+			Prometheus struct {
+				Enabled bool   `yaml:"enabled,omitempty"`
+				Path    string `yaml:"path,omitempty"`
+			} `yaml:"prometheus,omitempty"`
+		} `yaml:"debug,omitempty"`
 	} `yaml:"http,omitempty"`
 
 	Redis Redis `yaml:"redis,omitempty"`
 
-	MongoDB struct {
-		URI  string `yaml:"uri,omitempty"`
-		Name string `yaml:"name,omitempty"`
-	} `yaml:"mongodb"`
+	// Storage is the configuration for the registry's storage driver
+	Storage Storage `yaml:"storage"`
 }
 
 // LogHook is composed of hook Level and Type.
@@ -170,6 +181,91 @@ type Redis struct {
 	// IdleTimeout sets the amount time to wait before closing
 	// inactive connections.
 	IdleTimeout time.Duration `yaml:"idletimeout,omitempty"`
+}
+
+// Parameters defines a key-value parameters mapping
+type Parameters map[string]interface{}
+
+// Storage defines the configuration for kuade object storage
+type Storage map[string]Parameters
+
+func (storage Storage) Type() string {
+	var storageType []string
+
+	for k := range storage {
+		switch k {
+		case "mongodb":
+			// using mongodb as database
+		default:
+			storageType = append(storageType, k)
+		}
+	}
+
+	if len(storageType) > 1 {
+		panic("multiple storage drivers specified in configuration or environment: " + strings.Join(storageType, ", "))
+	}
+	if len(storageType) == 1 {
+		return storageType[0]
+	}
+	return ""
+}
+
+func (storage Storage) Parameters() Parameters {
+	return storage[storage.Type()]
+}
+
+// setParameter changes the parameter at the provided key to the new value
+func (storage Storage) setParameter(key string, value interface{}) {
+	storage[storage.Type()][key] = value
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface
+// Unmarshals a single item map into a Storage or a string into a Storage type with no parameters
+func (storage *Storage) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var storageMap map[string]Parameters
+	err := unmarshal(&storageMap)
+	if err == nil {
+		if len(storageMap) > 1 {
+			types := make([]string, 0, len(storageMap))
+			for k := range storageMap {
+				switch k {
+				case "maintenance":
+					// allow for configuration of maintenance
+				case "cache":
+					// allow configuration of caching
+				case "delete":
+					// allow configuration of delete
+				case "redirect":
+					// allow configuration of redirect
+				default:
+					types = append(types, k)
+				}
+			}
+
+			if len(types) > 1 {
+				return fmt.Errorf("must provide exactly one storage type. Provided: %v", types)
+			}
+		}
+		*storage = storageMap
+		return nil
+	}
+
+	var storageType string
+	err = unmarshal(&storageType)
+	if err == nil {
+		*storage = Storage{storageType: Parameters{}}
+		return nil
+	}
+
+	return err
+}
+
+// MarshalYAML implements the yaml.Marshaler interface
+func (storage Storage) MarshalYAML() (interface{}, error) {
+	if storage.Parameters() == nil {
+		return storage.Type(), nil
+	}
+	return map[string]Parameters(storage), nil
 }
 
 // v0_1Configuration is a Version 0.1 Configuration struct
@@ -240,9 +336,6 @@ type BugsnagReporting struct {
 	// Endpoint is used for specifying an enterprise Bugsnag endpoint.
 	Endpoint string `yaml:"endpoint,omitempty"`
 }
-
-// Parameters defines a key-value parameters mapping
-type Parameters map[string]interface{}
 
 // Parse parses an input configuration yaml document into a Configuration struct
 // This should generally be capable of handling old configuration format versions

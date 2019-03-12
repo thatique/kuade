@@ -52,6 +52,16 @@ var configStruct = Configuration{
 		} `yaml:"tls,omitempty"`
 		DrainTimeout time.Duration `yaml:"draintimeout,omitempty"`
 		Headers      http.Header   `yaml:"headers,omitempty"`
+
+		Debug struct {
+			// Addr specifies the bind address for the debug server.
+			Addr string `yaml:"addr,omitempty"`
+			// Prometheus configures the Prometheus telemetry endpoint.
+			Prometheus struct {
+				Enabled bool   `yaml:"enabled,omitempty"`
+				Path    string `yaml:"path,omitempty"`
+			} `yaml:"prometheus,omitempty"`
+		} `yaml:"debug,omitempty"`
 	}{
 		Addr: "localhost",
 		TLS: struct {

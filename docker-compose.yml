@@ -1,0 +1,35 @@
+version: '3'
+services:
+  db:
+    image: mongo:3.6.8-strech
+    volumes:
+      - mongodata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis:5.0.3
+    ports:
+      - "6379:6379"
+  mail:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8025:8025"
+  elasticsearch:
+    image: elasticsearch:6.6.1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+  kuade:
+    build: .
+    volumes:
+      - ./docker/data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+volumes:
+  mongodata:

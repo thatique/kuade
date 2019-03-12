@@ -131,7 +131,7 @@ type UserStore interface {
 	// find a user by slug
 	FindBySlug(ctx context.Context, slug string) (*User, error)
 
-	FindOrCreateUserForProvider(ctx context.Context, user *User, provider OAuthProvider) (*User, error)
+	FindOrCreateUserForProvider(ctx context.Context, userdata *User, provider OAuthProvider) (newuser bool, user *User, err error)
 
 	// list returns a list of users from the datastore.
 	List(ctx context.Context, pagination types.PaginationArgs) ([]*User, error)
@@ -145,7 +145,7 @@ type UserStore interface {
 	Delete(context.Context, *User) error
 
 	// Count returns a count of active users.
-	Count(context.Context) (int64, error)
+	Count(context.Context) (int, error)
 }
 
 func (user *User) IsActive() bool {

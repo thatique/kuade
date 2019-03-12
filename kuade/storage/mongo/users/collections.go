@@ -7,14 +7,18 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/pkg/emailparser"
 	"github.com/thatique/kuade/kuade/auth"
-	"github.com/thatique/kuade/kuade/storage/mongo"
+	"github.com/thatique/kuade/kuade/storage/mongo/db"
 )
+
+func init() {
+	db.Register(&userMgo{})
+}
 
 type dbProfile struct {
 	Name    string `bson:"name,omitempty"`
 	Picture string `bson:"picture,omitempty"`
 	Bio     string `bson:"bio,omitempty"`
-	
+
 	Age     int32  `bson:"age,omitempty"`
 	Address string `bson:"address,omitempty"`
 	City    string `bson:"city,omitempty"`
@@ -67,7 +71,7 @@ func (u *userMgo) SlugQuery(slug string) bson.M {
 	return bson.M{"slug": slug}
 }
 
-func (u *userMgo) Presave(conn *mongo.Conn) {
+func (u *userMgo) Presave(conn *db.Conn) {
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now().UTC()
 	}
