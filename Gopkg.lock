@@ -2,6 +2,44 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:5b8a3b9e8d146a93f6d0538d3be408c9adff07fd694d4094b814a376b4727b14"
+  name = "github.com/Shopify/logrus-bugsnag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "577dee27f20dd8f1a529f82210094af593be12bd"
+
+[[projects]]
+  digest = "1:7b81d2ed76bf960333a8020c4b8c22abd6072f0b54ad31c66e90e6a17a19315a"
+  name = "github.com/bshuster-repo/logrus-logstash-hook"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
+  version = "v0.4.1"
+
+[[projects]]
+  digest = "1:aeb8a3c88503ace4a5ac883491fcff76a610636ba9dc4753dc18740aae5cc937"
+  name = "github.com/bugsnag/bugsnag-go"
+  packages = [
+    ".",
+    "device",
+    "errors",
+    "headers",
+    "sessions",
+  ]
+  pruneopts = "UT"
+  revision = "834d8fee64233ea79b0389ad7a5a438261788f66"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:3049c43c6d1cfaa347acd27d6342187f8f38d9f416bbba7b02b43f82848302d2"
+  name = "github.com/bugsnag/panicwrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4009b2b7c78d820cc4a2e42f035bb557ce4ae45b"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:90f6e3a87e2647608b03bd474a485af2dffadcf3c7108d39f01b6f46e8aafec8"
   name = "github.com/emersion/go-message"
   packages = [
@@ -35,6 +73,22 @@
   revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
 
 [[projects]]
+  digest = "1:bed9d72d596f94e65fff37f4d6c01398074a6bb1c3f3ceff963516bd01db6ff5"
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
+
+[[projects]]
+  digest = "1:318f1c959a8a740366fce4b1e1eb2fd914036b4af58fbd0a003349b305f118ad"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  pruneopts = "UT"
+  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
   name = "github.com/gomodule/redigo"
   packages = [
@@ -46,12 +100,44 @@
   version = "v2.0.0"
 
 [[projects]]
+  digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
+  name = "github.com/gorilla/handlers"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:ca59b1175189b3f0e9f1793d2c350114be36eaabbe5b9f554b35edee1de50aea"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a7962380ca08b5a188038c69871b8d3fbdf31e89"
+  version = "v1.7.0"
+
+[[projects]]
   digest = "1:e72d1ebb8d395cf9f346fd9cbc652e5ae222dd85e0ac842dc57f175abed6d195"
   name = "github.com/gorilla/securecookie"
   packages = ["."]
   pruneopts = "UT"
   revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
   version = "v1.1.1"
+
+[[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f433da6fbabb0bd1bd730fd340782015c644123d02eb78c20c69ce03352daad1"
+  name = "github.com/kardianos/osext"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -78,25 +164,6 @@
   version = "v0.1.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:68e5a49c68fc8a8fbf152ce3c706d0e5f4e07a219f5eafbe9d5786dbda6bd1b7"
-  name = "github.com/minio/minio"
-  packages = ["pkg/wildcard"]
-  pruneopts = "UT"
-  revision = "e46338692104ae1875b4992564bb4161f6d3b5cf"
-
-[[projects]]
-  digest = "1:90bd837cc278cfe1d698a0a25b585f920b2f7fed395c95ce9bf8ce643ca9d945"
-  name = "github.com/minio/minio-go"
-  packages = [
-    "pkg/s3utils",
-    "pkg/set",
-  ]
-  pruneopts = "UT"
-  revision = "59af836a7e6d99cbefa093475fbde0a4552d483f"
-  version = "v6.0.19"
-
-[[projects]]
   digest = "1:be88a46cd36136d9a0fbe8f42dffc269a62544e3a12ff3b047b4704f9b349b42"
   name = "github.com/mozillazg/go-unidecode"
   packages = [
@@ -116,12 +183,28 @@
   revision = "e180dbdc8da04c4fa04272e875ce64949f38bd3e"
 
 [[projects]]
-  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
+  digest = "1:e4c72127d910a96daf869a44f3dd563b86dbe6931a172863a0e99c5ff04b59e4"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
-  version = "v1.3.0"
+  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
+  version = "v0.0.3"
+
+[[projects]]
+  digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   digest = "1:af47085335474571b48650a705ca90f01c57608d8477d8646ed3588b493462fc"
@@ -133,6 +216,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:0548c16cd26121fdea8a3bd76b04995f02aac7832b0c443f07a1b11407990f21"
+  name = "github.com/syaiful6/thatique"
+  packages = ["uuid"]
+  pruneopts = "UT"
+  revision = "98b8c14789f9d762b962ba433da9d603491679b5"
+
+[[projects]]
+  branch = "master"
   digest = "1:0c75a1e88c2b1e0361102c133f2690fd1fd5ab5da829f60a9c2dd20b9c224c71"
   name = "golang.org/x/crypto"
   packages = [
@@ -141,18 +232,40 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "c2843e01d9a2bc60bb26ad24e09734fdc2d9ec58"
+  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
 
 [[projects]]
   branch = "master"
-  digest = "1:85cd5224b89829559e8327ba2e52e0df72638d33cf3082b066ea9dea34391e2f"
+  digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "context/ctxhttp",
+  ]
+  pruneopts = "UT"
+  revision = "5c2c250b6a70e39b74bb544433a348a892b10530"
+
+[[projects]]
+  branch = "master"
+  digest = "1:037497a2c592b7aa03789f9d6492d02e7d7d166c0e363c95cb53952cf11c7ab0"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
+
+[[projects]]
+  branch = "master"
+  digest = "1:944736317d4f2fb1c1015ef9ca05fd9313b4e19f1128901cc678f636435fa9b0"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "10058d7d4faa7dd5ef860cbd31af00903076e7b8"
+  revision = "fead79001313d15903fb4605b4a1b781532cd93e"
 
 [[projects]]
   digest = "1:8eae63fdad880f0a261f473523e0f66b9be0361360d9d42c7b499227070ff5af"
@@ -174,6 +287,22 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:6f3bd49ddf2e104e52062774d797714371fac1b8bddfd8e124ce78e6b2264a10"
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch",
+  ]
+  pruneopts = "UT"
+  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
+  version = "v1.4.0"
+
+[[projects]]
   branch = "v1"
   digest = "1:af715ae33cc1f5695c4b2a4e4b21d008add8802a99e15bb467ac7c32edb5000d"
   name = "gopkg.in/check.v1"
@@ -193,18 +322,23 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Shopify/logrus-bugsnag",
+    "github.com/bshuster-repo/logrus-logstash-hook",
+    "github.com/bugsnag/bugsnag-go",
     "github.com/emersion/go-message",
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
     "github.com/gomodule/redigo/redis",
-    "github.com/minio/minio-go/pkg/s3utils",
-    "github.com/minio/minio-go/pkg/set",
-    "github.com/minio/minio/pkg/wildcard",
+    "github.com/gorilla/handlers",
+    "github.com/gorilla/mux",
     "github.com/mozillazg/go-unidecode",
     "github.com/shibukawa/configdir",
     "github.com/sirupsen/logrus",
+    "github.com/spf13/cobra",
     "github.com/syaiful6/sersan",
+    "github.com/syaiful6/thatique/uuid",
     "golang.org/x/crypto/bcrypt",
+    "golang.org/x/oauth2",
     "gopkg.in/check.v1",
     "gopkg.in/yaml.v2",
   ]

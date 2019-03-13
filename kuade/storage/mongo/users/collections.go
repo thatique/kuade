@@ -37,7 +37,6 @@ type userMgo struct {
 	Email      string          `bson:"email"`
 	Password   []byte          `bson:"password"`
 	Status     auth.UserStatus `bson:"status"`
-	Superuser  bool            `bson:"is_superuser"`
 	Role       auth.Role       `bson:"role"`
 	CreatedAt  time.Time       `bson:"created_at"`
 	Providers  []userProvider  `bson:"identities"`
@@ -114,7 +113,6 @@ func fromAuthModel(user *auth.User) *userMgo {
 		Email: user.Email,
 		Password: user.Password,
 		Status: user.Status,
-		Superuser: user.Superuser,
 		Role: user.Role,
 		CreatedAt: user.CreatedAt,
 	}
@@ -136,7 +134,6 @@ func toAuthModel(user *userMgo) *auth.User {
 		Email: user.Email,
 		Password: user.Password,
 		Status: user.Status,
-		Superuser: user.Superuser,
 		Role: user.Role,
 		CreatedAt: user.CreatedAt,
 	}

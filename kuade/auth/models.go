@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	
+
 	"golang.org/x/crypto/bcrypt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/kuade/api/types"
@@ -64,18 +64,21 @@ const (
 	ROLE_INDIVIDUAL Role = iota
 	ROLE_VENDOR
 	ROLE_STAFF
+	ROLE_SUPERUSER
 )
 
 var roleIDs = map[Role]string{
 	ROLE_INDIVIDUAL: "individual",
 	ROLE_VENDOR:     "vendor",
 	ROLE_STAFF:      "staff",
+	ROLE_SUPERUSER:  "superuser",
 }
 
 var roleNames = map[string]Role{
 	"individual": ROLE_INDIVIDUAL,
 	"vendor":     ROLE_VENDOR,
 	"staff":      ROLE_STAFF,
+	"superuser":  ROLE_SUPERUSER,
 }
 
 func (role Role) MarshalText() ([]byte, error) {
@@ -97,7 +100,7 @@ type Profile struct {
 	Name    string `json:"name,omitempty"`
 	Picture string `json:"picture,omitempty"`
 	Bio     string `json:"bio,omitempty"`
-	
+
 	Age     int32  `json:"age,omitempty"`
 	Address string `json:"address,omitempty"`
 	City    string `json:"city,omitempty"`
@@ -110,8 +113,7 @@ type User struct {
 	Profile    Profile         `json:"profile,omitempty"`
 	Email      string          `json:"email"`
 	Password   []byte          `json:"-"`
-	Status     UserStatus      `son:"status"`
-	Superuser  bool            `json:"is_superuser"`
+	Status     UserStatus      `json:"status"`
 	Role       Role            `json:"-"`
 	CreatedAt  time.Time       `json:"created_at"`
 }
@@ -166,5 +168,5 @@ func (user *User) VerifyPassword(pswd []byte) bool {
 		return false
 	}
 
-	return true 
+	return true
 }

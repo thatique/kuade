@@ -37,7 +37,7 @@ func TestPasswordHasher(t *testing.T) {
 			return
 		}
 
-		if user.VerifyPassword(data.checkpassword) != data.correct {
+		if user.VerifyPassword([]byte(data.checkpassword)) != data.correct {
 			t.Errorf("passwords for %s should return %v", user.Email, data.correct)
 			return
 		}

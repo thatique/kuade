@@ -61,6 +61,7 @@ func (w *worker) stop() {
 type Dispatcher struct {
 	workerPool chan chan Job
 	maxWorkers int
+	workers    []*worker
 	jobQueue   chan Job
 }
 
@@ -70,6 +71,7 @@ func NewDispatcher(jobQueue chan Job, maxWorkers int) *Dispatcher {
 	return &Dispatcher{
 		jobQueue:   jobQueue,
 		maxWorkers: maxWorkers,
+		workers: make([]*worker, maxWorkers),
 		workerPool: workerPool,
 	}
 }
@@ -78,9 +80,16 @@ func (d *Dispatcher) Run() {
 	for i := 0; i < d.maxWorkers; i++ {
 		w := newWorker(i+1, d.workerPool)
 		w.start()
+		d.workers[i] = w
 	}
 
 	go d.dispatch()
+}
+
+func (d *Dispatcher) Stop() {
+	for _, w := range d.workers {
+		w.stop()
+	}
 }
 
 func (d *Dispatcher) dispatch() {
