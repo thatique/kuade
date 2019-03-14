@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/syaiful6/thatique/uuid"
+	"github.com/thatique/kuade/pkg/uuid"
 )
 
 // instanceContext is a context that provides only an instance id. It is
