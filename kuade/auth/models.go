@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/kuade/api/types"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserStatus int
@@ -19,9 +19,9 @@ const (
 )
 
 var statusNames = map[string]UserStatus{
-	"inactive":   USER_STATUS_INACTIVE,
-	"active":     USER_STATUS_ACTIVE,
-	"locked":     USER_STATUS_LOCKED,
+	"inactive": USER_STATUS_INACTIVE,
+	"active":   USER_STATUS_ACTIVE,
+	"locked":   USER_STATUS_LOCKED,
 }
 
 func (st UserStatus) IsValid() bool {
@@ -108,14 +108,14 @@ type Profile struct {
 }
 
 type User struct {
-	Id         bson.ObjectId   `json:"id"`
-	Slug       string          `json:"slug"`
-	Profile    Profile         `json:"profile,omitempty"`
-	Email      string          `json:"email"`
-	Password   []byte          `json:"-"`
-	Status     UserStatus      `json:"status"`
-	Role       Role            `json:"-"`
-	CreatedAt  time.Time       `json:"created_at"`
+	Id        bson.ObjectId `json:"id"`
+	Slug      string        `json:"slug"`
+	Profile   Profile       `json:"profile,omitempty"`
+	Email     string        `json:"email"`
+	Password  []byte        `json:"-"`
+	Status    UserStatus    `json:"status"`
+	Role      Role          `json:"-"`
+	CreatedAt time.Time     `json:"created_at"`
 }
 
 type OAuthProvider struct {

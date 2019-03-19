@@ -16,9 +16,9 @@ const (
 )
 
 var (
-	ErrTokenMismatch    = errors.New("oauth2 state token mismatch")
-	ErrNoToken          = errors.New("oauth2 state token not found in request")
-	InvalidToken        = errors.New("oauth2 invalid state token")
+	ErrTokenMismatch = errors.New("oauth2 state token mismatch")
+	ErrNoToken       = errors.New("oauth2 state token not found in request")
+	InvalidToken     = errors.New("oauth2 invalid state token")
 )
 
 type OAuth2ErrorResponse struct {
@@ -43,7 +43,7 @@ type UserFetcher interface {
 }
 
 type OAuth2LoginHandler struct {
-	session      *Session
+	session *Session
 
 	Name         string
 	RedirectPath string
@@ -54,11 +54,11 @@ type OAuth2LoginHandler struct {
 
 func NewOauthLoginHandler(session *Session, name, path string, config *oauth2.Config, fetcher UserFetcher) *OAuth2LoginHandler {
 	return &OAuth2LoginHandler{
-		session: session,
-		Name: name,
+		session:      session,
+		Name:         name,
 		RedirectPath: path,
-		Config: config,
-		Fetcher: fetcher,
+		Config:       config,
+		Fetcher:      fetcher,
 	}
 }
 
@@ -134,7 +134,7 @@ func generateSessionState(r *http.Request) string {
 		return state
 	}
 
-	state, err := text.RandomString(32, text.ASCII_LOWERCASE + text.ASCII_UPPERCASE + text.DIGITS + "-_~")
+	state, err := text.RandomString(32, text.ASCII_LOWERCASE+text.ASCII_UPPERCASE+text.DIGITS+"-_~")
 	if err != nil {
 		panic(err)
 	}

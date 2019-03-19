@@ -9,7 +9,7 @@ import (
 
 // signinform represent form input that user submit when trying to login
 type SigninForm struct {
-	users    UserStore
+	users UserStore
 
 	Email    string
 	Password string

@@ -12,12 +12,12 @@ type APIError struct {
 
 // APIErrorResponse - error response format
 type APIErrorResponse struct {
-	XMLName    xml.Name `xml:"Error" json:"-"`
-	Code       string
-	Message    string
-	Resource   string
-	RequestID  string `xml:"RequestId" json:"RequestId"`
-	HostID     string `xml:"HostId" json:"HostId"`
+	XMLName   xml.Name `xml:"Error" json:"-"`
+	Code      string
+	Message   string
+	Resource  string
+	RequestID string `xml:"RequestId" json:"RequestId"`
+	HostID    string `xml:"HostId" json:"HostId"`
 }
 
 // APIErrorCode type of error status.

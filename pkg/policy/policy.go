@@ -12,9 +12,9 @@ import (
 const DefaultVersion = "2012-10-17"
 
 type Policy struct {
-	ID         ID `json:"ID,omitempty" bson:"_id,omitempty"`
-	Version    string        `bson:"version"`
-	Statements []Statement   `json:"Statement" bson:"statement"`
+	ID         ID          `json:"ID,omitempty" bson:"_id,omitempty"`
+	Version    string      `bson:"version"`
+	Statements []Statement `json:"Statement" bson:"statement"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
@@ -109,7 +109,7 @@ func (policy Policy) GetBSON() (interface{}, error) {
 
 	return struct {
 		ID         ID          `json:"ID,omitempty" bson:"id,omitempty"`
-		Version    string      `bson:"version"`
+		Version    string      `json:"version" bson:"version"`
 		Statements []Statement `json:"Statement" bson:"statement"`
 	}{
 		ID:         policy.ID,

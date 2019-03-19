@@ -53,20 +53,3 @@ func Get() (*Configuration, error) {
 
 	return config, nil
 }
-
-func GetDefaultCertsDir() string {
-	folders := CfgDir.QueryFolders(configdir.System)
-	return filepath.Join(folders[0].Path, certsDir)
-}
-
-func GetDefaultCertsCADir() string {
-	return filepath.Join(GetDefaultCertsDir(), certsCADir)
-}
-
-func GetPublicCertFile() string {
-	return filepath.Join(GetDefaultCertsDir(), publicCertFile)
-}
-
-func GetPrivateKeyFile() string {
-	return filepath.Join(GetDefaultCertsDir(), privateKeyFile)
-}

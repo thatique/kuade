@@ -17,8 +17,8 @@ type RedisToken struct {
 
 func NewRedisToken(pool *redis.Pool) *RedisToken {
 	return &RedisToken{
-		pool: pool,
-		Expire: 7200, // two hours
+		pool:      pool,
+		Expire:    7200, // two hours
 		keyPrefix: "kuade:tokens:",
 	}
 }
@@ -63,7 +63,7 @@ func (t *RedisToken) Generate(user *auth.User) (token string, err error) {
 		CreatedAt: time.Now().UTC().Unix(),
 	}
 
-	args := redis.Args{}.Add(t.keyPrefix+user.Id.Hex()).Add(t.keyPrefix+token)
+	args := redis.Args{}.Add(t.keyPrefix + user.Id.Hex()).Add(t.keyPrefix + token)
 	args = args.Add(t.Expire).AddFlat(tok)
 	_, err = insertScript.Do(conn, args...)
 	if err != nil {
@@ -81,7 +81,7 @@ func (t *RedisToken) Delete(token string) error {
 		return err
 	}
 
-	tok := t.keyPrefix+token
+	tok := t.keyPrefix + token
 	key, err := redis.String(conn.Do("GET", tok))
 	if err != nil {
 		return err

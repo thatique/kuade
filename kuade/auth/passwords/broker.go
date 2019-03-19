@@ -52,7 +52,7 @@ type Broker struct {
 }
 
 func NewBroker(t tokens.TokenGenerator, n notifications.Notifier, store auth.UserStore) *Broker {
-	return &Broker{store: store, token: t, notifier: n,}
+	return &Broker{store: store, token: t, notifier: n}
 }
 
 type ResetRequest struct {
@@ -87,10 +87,10 @@ func (b *Broker) SendResetLink(ctx context.Context, ip string, email string) err
 		defer w.Close()
 		t := template.Must(template.New("reset").Parse(b.Message))
 		if err := t.Execute(w, map[string]interface{}{
-			"link": link,
-			"Email": user.Email,
+			"link":      link,
+			"Email":     user.Email,
 			"CreatedAt": time.Now().UTC().Format(time.RFC1123),
-			"IP": ip,
+			"IP":        ip,
 		}); err != nil {
 			panic(err)
 		}
@@ -142,7 +142,7 @@ func (b *Broker) ValidateReset(ctx context.Context, uid, token string) (req *Res
 		return
 	}
 
-	req = &ResetRequest{user: user,}
+	req = &ResetRequest{user: user}
 
 	ok = b.token.IsValid(user, token)
 	if !ok {

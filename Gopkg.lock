@@ -85,8 +85,8 @@
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   pruneopts = "UT"
-  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
-  version = "v1.3.0"
+  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
@@ -98,6 +98,14 @@
   pruneopts = "UT"
   revision = "9c11da706d9b7902c6da69c592f75637793fe121"
   version = "v2.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
+  name = "github.com/google/btree"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
 
 [[projects]]
   digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
@@ -169,7 +177,7 @@
   name = "github.com/minio/minio"
   packages = ["pkg/wildcard"]
   pruneopts = "UT"
-  revision = "a0ee7be05096078f364ce00a3199d99c3b4e92d9"
+  revision = "eb69c4f946ce10f5996566f9ee4c550a3119aeae"
 
 [[projects]]
   digest = "1:90bd837cc278cfe1d698a0a25b585f920b2f7fed395c95ce9bf8ce643ca9d945"
@@ -192,6 +200,14 @@
   pruneopts = "UT"
   revision = "7ab3c72180eeb79ccb8746137e14d6b0a60dd685"
   version = "v0.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
+  name = "github.com/petar/GoLLRB"
+  packages = ["llrb"]
+  pruneopts = "UT"
+  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
 
 [[projects]]
   branch = "master"
@@ -277,14 +293,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:944736317d4f2fb1c1015ef9ca05fd9313b4e19f1128901cc678f636435fa9b0"
+  digest = "1:ed708ad22c955df62e7eaba9ddd9edd3afc7818a4a72d9680bf797ac6c5ae3a8"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "fead79001313d15903fb4605b4a1b781532cd93e"
+  revision = "a2f829d7f35f2ed1c3520c553a6226495455cae0"
 
 [[projects]]
   digest = "1:8eae63fdad880f0a261f473523e0f66b9be0361360d9d42c7b499227070ff5af"
@@ -304,6 +320,14 @@
   pruneopts = "UT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9fdc2b55e8e0fafe4b41884091e51e77344f7dc511c5acedcfd98200003bff90"
+  name = "golang.org/x/time"
+  packages = ["rate"]
+  pruneopts = "UT"
+  revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
 [[projects]]
   digest = "1:6f3bd49ddf2e104e52062774d797714371fac1b8bddfd8e124ce78e6b2264a10"
@@ -348,6 +372,7 @@
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
     "github.com/gomodule/redigo/redis",
+    "github.com/google/btree",
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/minio/minio-go/pkg/s3utils",
@@ -361,6 +386,7 @@
     "github.com/syaiful6/thatique/uuid",
     "golang.org/x/crypto/bcrypt",
     "golang.org/x/oauth2",
+    "golang.org/x/time/rate",
     "gopkg.in/check.v1",
     "gopkg.in/yaml.v2",
   ]

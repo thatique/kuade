@@ -2,33 +2,41 @@ package kuade
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/bugsnag/bugsnag-go"
-	logstash "github.com/bshuster-repo/logrus-logstash-hook"
-	gorhandlers "github.com/gorilla/handlers"
 	"github.com/Shopify/logrus-bugsnag"
+	logstash "github.com/bshuster-repo/logrus-logstash-hook"
+	"github.com/bugsnag/bugsnag-go"
+	gorhandlers "github.com/gorilla/handlers"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 
 	"github.com/thatique/kuade/configuration"
-	"github.com/thatique/kuade/version"
-	"github.com/thatique/kuade/pkg/queue"
 	"github.com/thatique/kuade/pkg/uuid"
+	"github.com/thatique/kuade/kuade/listener"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
+	"github.com/thatique/kuade/version"
 )
 
 type Application interface {
 	GetHTTPHandler(context.Context, *configuration.Configuration) (http.Handler, error)
-}
 
-type AppFeatures struct {
-	JobChan chan<- Job
+	Shutdown(context.Context) error
 }
 
 type Engine struct {
+	app    Application
+	ctx    context.Context
 	config *configuration.Configuration
 	server *http.Server
+	quitCh chan os.Signal
 }
 
 func NewEngine(app Application, config *configuration.Configuration) (*Engine, error) {
@@ -46,7 +54,7 @@ func NewEngine(app Application, config *configuration.Configuration) (*Engine, e
 	// with uuid generation under low entropy.
 	uuid.Loggerf = webcontext.GetLogger(ctx).Warnf
 
-	appHandler, err := app.GetHTTPHandler(ctx, config)
+	handler, err := app.GetHTTPHandler(ctx, config)
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +68,116 @@ func NewEngine(app Application, config *configuration.Configuration) (*Engine, e
 	}
 
 	return &Engine{
+		app:    app,
+		ctx:    ctx,
 		config: config,
 		server: server,
+		quitCh: make(chan os.Signal, 1),
 	}, nil
+}
+
+func (engine *Engine) ListenAndServe() error {
+	config := engine.config
+	ln, err := listener.NewListener(config.HTTP.Net, config.HTTP.Addr)
+	if err != nil {
+		return err
+	}
+
+	if config.HTTP.TLS.Certificate != "" {
+		var tlsMinVersion uint16
+		if config.HTTP.TLS.MinimumTLS == "" {
+			tlsMinVersion = tls.VersionTLS10
+		} else {
+			switch config.HTTP.TLS.MinimumTLS {
+			case "tls1.0":
+				tlsMinVersion = tls.VersionTLS10
+			case "tls1.1":
+				tlsMinVersion = tls.VersionTLS11
+			case "tls1.2":
+				tlsMinVersion = tls.VersionTLS12
+			default:
+				return fmt.Errorf("unknown minimum TLS level '%s' specified for http.tls.minimumtls", config.HTTP.TLS.MinimumTLS)
+			}
+			webcontext.GetLogger(engine.ctx).Infof("restricting TLS to %s or higher", config.HTTP.TLS.MinimumTLS)
+		}
+
+		tlsConf := &tls.Config{
+			ClientAuth:               tls.NoClientCert,
+			NextProtos:               []string{"h2", "http/1.1"},
+			MinVersion:               tlsMinVersion,
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+
+		tlsConf.Certificates = make([]tls.Certificate, 1)
+		tlsConf.Certificates[0], err = tls.LoadX509KeyPair(config.HTTP.TLS.Certificate, config.HTTP.TLS.Key)
+		if err != nil {
+			return err
+		}
+
+		if len(config.HTTP.TLS.ClientCAs) != 0 {
+			pool := x509.NewCertPool()
+
+			for _, ca := range config.HTTP.TLS.ClientCAs {
+				caPem, err := ioutil.ReadFile(ca)
+				if err != nil {
+					return err
+				}
+
+				if ok := pool.AppendCertsFromPEM(caPem); !ok {
+					return fmt.Errorf("could not add CA to pool")
+				}
+			}
+
+			for _, subj := range pool.Subjects() {
+				webcontext.GetLogger(engine.ctx).Debugf("CA Subject: %s", string(subj))
+			}
+
+			tlsConf.ClientAuth = tls.RequireAndVerifyClientCert
+			tlsConf.ClientCAs = pool
+		}
+
+		ln = tls.NewListener(ln, tlsConf)
+		webcontext.GetLogger(engine.ctx).Infof("listening on %v, tls", ln.Addr())
+
+		if !config.HTTP.Secure {
+			config.HTTP.Secure = true
+		}
+	} else {
+		webcontext.GetLogger(engine.ctx).Infof("listening on %v", ln.Addr())
+	}
+
+	// setup channel to get notified on SIGTERM and SIGINT signal
+	signal.Notify(engine.quitCh, syscall.SIGTERM, syscall.SIGINT)
+	serveErr := make(chan error)
+
+	// Start serving in goroutine and listen for stop signal in main thread
+	go func() {
+		serveErr <- engine.server.Serve(ln)
+	}()
+
+	select {
+	case err := <-serveErr:
+		return err
+	case <-engine.quitCh:
+		drainTimeout := time.Second * 60
+		if config.HTTP.DrainTimeout != 0 {
+			drainTimeout = config.HTTP.DrainTimeout
+		}
+		webcontext.GetLogger(engine.ctx).Info("stopping server gracefully. Draining connections for ", drainTimeout)
+		c, cancel := context.WithTimeout(context.Background(), drainTimeout)
+		defer cancel()
+		// call application shutdown
+		engine.app.Shutdown(c)
+		return engine.server.Shutdown(c)
+	}
 }
 
 // panicHandler add an HTTP handler to web app. The handler recover the happening
@@ -146,8 +261,8 @@ func configureLogging(ctx context.Context, config *configuration.Configuration) 
 			fields = append(fields, k)
 		}
 
-		ctx = scontext.WithValues(ctx, config.Log.Fields)
-		ctx = scontext.WithLogger(ctx, scontext.GetLogger(ctx, fields...))
+		ctx = webcontext.WithValues(ctx, config.Log.Fields)
+		ctx = webcontext.WithLogger(ctx, webcontext.GetLogger(ctx, fields...))
 	}
 
 	return ctx, nil

@@ -13,7 +13,7 @@ var models = []Model{}
 
 // A model represent mongo collection
 type Model interface {
-	Col()     string
+	Col() string
 	Indexes() []mgo.Index
 }
 

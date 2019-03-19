@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+
+	"github.com/thatique/kuade/version"
 )
 
 var showVersion bool

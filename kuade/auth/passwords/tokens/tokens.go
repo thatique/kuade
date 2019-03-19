@@ -1,8 +1,8 @@
 package tokens
 
 import (
-	"github.com/thatique/kuade/pkg/text"
 	"github.com/thatique/kuade/kuade/auth"
+	"github.com/thatique/kuade/pkg/text"
 )
 
 // TokenGenerator can create and check a token to be used in passwords

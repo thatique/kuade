@@ -5,9 +5,9 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/thatique/kuade/pkg/emailparser"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
+	"github.com/thatique/kuade/pkg/emailparser"
 )
 
 func init() {
@@ -31,15 +31,15 @@ type userProvider struct {
 }
 
 type userMgo struct {
-	Id         bson.ObjectId   `bson:"_id,omitempty"`
-	Slug       string          `bson:"slug"`
-	Profile    dbProfile       `bson:"profile,omitempty"`
-	Email      string          `bson:"email"`
-	Password   []byte          `bson:"password"`
-	Status     auth.UserStatus `bson:"status"`
-	Role       auth.Role       `bson:"role"`
-	CreatedAt  time.Time       `bson:"created_at"`
-	Providers  []userProvider  `bson:"identities"`
+	Id        bson.ObjectId   `bson:"_id,omitempty"`
+	Slug      string          `bson:"slug"`
+	Profile   dbProfile       `bson:"profile,omitempty"`
+	Email     string          `bson:"email"`
+	Password  []byte          `bson:"password"`
+	Status    auth.UserStatus `bson:"status"`
+	Role      auth.Role       `bson:"role"`
+	CreatedAt time.Time       `bson:"created_at"`
+	Providers []userProvider  `bson:"identities"`
 }
 
 func (user *userMgo) Col() string {
@@ -99,42 +99,42 @@ func (u *userMgo) Presave(conn *db.Conn) {
 
 func fromAuthModel(user *auth.User) *userMgo {
 	return &userMgo{
-		Id: user.Id,
+		Id:   user.Id,
 		Slug: user.Slug,
 		Profile: dbProfile{
-			Name: user.Profile.Name,
+			Name:    user.Profile.Name,
 			Picture: user.Profile.Picture,
-			Bio: user.Profile.Bio,
-			Age: user.Profile.Age,
+			Bio:     user.Profile.Bio,
+			Age:     user.Profile.Age,
 			Address: user.Profile.Address,
-			City: user.Profile.City,
-			State: user.Profile.State,
+			City:    user.Profile.City,
+			State:   user.Profile.State,
 		},
-		Email: user.Email,
-		Password: user.Password,
-		Status: user.Status,
-		Role: user.Role,
+		Email:     user.Email,
+		Password:  user.Password,
+		Status:    user.Status,
+		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
 }
 
 func toAuthModel(user *userMgo) *auth.User {
 	return &auth.User{
-		Id: user.Id,
+		Id:   user.Id,
 		Slug: user.Slug,
 		Profile: auth.Profile{
-			Name: user.Profile.Name,
+			Name:    user.Profile.Name,
 			Picture: user.Profile.Picture,
-			Bio: user.Profile.Bio,
-			Age: user.Profile.Age,
+			Bio:     user.Profile.Bio,
+			Age:     user.Profile.Age,
 			Address: user.Profile.Address,
-			City: user.Profile.City,
-			State: user.Profile.State,
+			City:    user.Profile.City,
+			State:   user.Profile.State,
 		},
-		Email: user.Email,
-		Password: user.Password,
-		Status: user.Status,
-		Role: user.Role,
+		Email:     user.Email,
+		Password:  user.Password,
+		Status:    user.Status,
+		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
 }

@@ -5,27 +5,27 @@ import (
 )
 
 func TestPasswordHasher(t *testing.T) {
-	userCases := []struct{
+	userCases := []struct {
 		email, password, checkpassword string
-		correct bool
+		correct                        bool
 	}{
 		{
-			email: "nami@pub.example.com",
-			password: "secret",
+			email:         "nami@pub.example.com",
+			password:      "secret",
 			checkpassword: "secret",
-			correct: true,
+			correct:       true,
 		},
 		{
-			email: "nami@pub.example.com",
-			password: "secret",
+			email:         "nami@pub.example.com",
+			password:      "secret",
 			checkpassword: "secret2",
-			correct: false,
+			correct:       false,
 		},
 		{
-			email:    "luci@machine.example",
-			password: "secret12333longpasswordssssssssssssssaaaaaa",
+			email:         "luci@machine.example",
+			password:      "secret12333longpasswordssssssssssssssaaaaaa",
 			checkpassword: "secret12333longpasswordssssssssssssssaaaaaa",
-			correct: true,
+			correct:       true,
 		},
 	}
 

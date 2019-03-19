@@ -13,7 +13,7 @@ import (
 type Configuration struct {
 	Version Version `yaml:"version"`
 
-	DataPath string `yaml:"data_path"`
+	DataPath string `yaml:"datapath"`
 
 	// Log supports setting various parameters related to the logging
 	// subsystem.
@@ -61,7 +61,7 @@ type Configuration struct {
 		// Secret specifies the secret key which HMAC tokens are created with.
 		Secret string `yaml:"secret,omitempty"`
 
-		SessionKeys []string `yaml:"session_keys,omitempty"`
+		SessionKeys []string `yaml:"sessionkeys,omitempty"`
 
 		// Secure, is this HTTP connection secure? proxy or directly
 		Secure bool `yaml:"secure,omitempty"`
@@ -194,8 +194,10 @@ func (storage Storage) Type() string {
 
 	for k := range storage {
 		switch k {
-		case "mongodb":
-			// using mongodb as database
+		case "maintenance":
+			// allow configuration of maintenance
+		case "cache":
+			// allow configuration of caching
 		default:
 			storageType = append(storageType, k)
 		}

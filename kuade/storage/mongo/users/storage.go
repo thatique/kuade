@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/globalsign/mgo/bson"
+	"github.com/thatique/kuade/kuade/api/types"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
-	"github.com/thatique/kuade/kuade/api/types"
 )
 
 type MgoUserStore struct {
@@ -15,7 +15,7 @@ type MgoUserStore struct {
 }
 
 func New(conn *db.Conn) *MgoUserStore {
-	return &MgoUserStore{c: conn,}
+	return &MgoUserStore{c: conn}
 }
 
 func (conn *MgoUserStore) FindById(ctx context.Context, id bson.ObjectId) (user *auth.User, err error) {
@@ -54,14 +54,14 @@ func (conn *MgoUserStore) FindOrCreateUserForProvider(ctx context.Context, data 
 		"identities": bson.M{
 			"$elemMatch": bson.M{
 				"name": provider.Name,
-				"key": provider.Key,
+				"key":  provider.Key,
 			},
 		},
 	}
 
 	dbuser = fromAuthModel(data)
 	dbuser.Providers = []userProvider{
-		userProvider{Name: provider.Name, Key: provider.Key,},
+		userProvider{Name: provider.Name, Key: provider.Key},
 	}
 
 	info, err := conn.c.C(dbuser).Upsert(userQuery, bson.M{"$setOnInsert": dbuser})

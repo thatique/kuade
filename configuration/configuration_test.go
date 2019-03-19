@@ -42,7 +42,7 @@ var configStruct = Configuration{
 		Host        string   `yaml:"host,omitempty"`
 		Prefix      string   `yaml:"prefix,omitempty"`
 		Secret      string   `yaml:"secret,omitempty"`
-		SessionKeys []string `yaml:"session_keys,omitempty"`
+		SessionKeys []string `yaml:"sessionkeys,omitempty"`
 		Secure      bool     `yaml:"secure,omitempty"`
 		TLS         struct {
 			Certificate string   `yaml:"certificate,omitempty"`
@@ -77,34 +77,23 @@ var configStruct = Configuration{
 		},
 	},
 
-	Redis: struct {
-		Addr         string        `yaml:"addr,omitempty"`
-		Password     string        `yaml:"password,omitempty"`
-		DB           int           `yaml:"db,omitempty"`
-		DialTimeout  time.Duration `yaml:"dialtimeout,omitempty"`
-		ReadTimeout  time.Duration `yaml:"readtimeout,omitempty"`
-		WriteTimeout time.Duration `yaml:"writetimeout,omitempty"`
-		MaxIdle      int           `yaml:"maxidle,omitempty"`
-		MaxActive    int           `yaml:"maxactive,omitempty"`
-		IdleTimeout  time.Duration `yaml:"idletimeout,omitempty"`
-	}{
+	Redis: Redis{
 		Addr:     "localhost",
 		Password: "secret",
 		DB:       1,
 	},
 
-	MongoDB: struct {
-		URI  string `yaml:"uri,omitempty"`
-		Name string `yaml:"name,omitempty"`
-	}{
-		URI: "mongodb://localhost:2701",
+	Storage: Storage{
+		"mongodb": Parameters{
+			"url": "mongodb://localhost:2703/db",
+		},
 	},
 }
 
 // configYamlV0_1 is a Version 0.1 yaml document representing configStruct
 var configYamlV0_1 = `
 version: 0.1
-data_path: /data
+datapath: /data
 log:
   level: info
   fields:
@@ -123,8 +112,9 @@ redis:
   addr: localhost
   password: secret
   db: 1
-mongodb:
-  uri: "mongodb://localhost:2701"
+storage:
+  mongodb:
+    url: mongodb://localhost:2703/db
 `
 
 type ConfigSuite struct {
@@ -160,6 +150,7 @@ func (suite *ConfigSuite) TestParseSimple(c *C) {
 func copyConfig(config Configuration) *Configuration {
 	configCopy := new(Configuration)
 
+	configCopy.DataPath = config.DataPath
 	configCopy.Version = MajorMinorVersion(config.Version.Major(), config.Version.Minor())
 
 	configCopy.Log = config.Log
@@ -175,7 +166,7 @@ func copyConfig(config Configuration) *Configuration {
 	}
 
 	configCopy.Redis = config.Redis
-	configCopy.MongoDB = config.MongoDB
+	configCopy.Storage = config.Storage
 
 	return configCopy
 }
