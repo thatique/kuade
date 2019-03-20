@@ -3,7 +3,6 @@ package tokens
 import (
 	"errors"
 	"fmt"
-	"mime"
 	"strings"
 	"unicode/utf8"
 )
@@ -27,9 +26,18 @@ const (
 	TokenColon
 )
 
+func Tokenize(s string) ([]Token, error) {
+	p := newTokenParser(s)
+	return p.parse()
+}
+
 type Token struct {
 	Kind TokenType
 	Text string
+}
+
+func IsTextToken(t Token) bool {
+	return t.Kind == TokenText
 }
 
 func (t Token) Show() string {
@@ -69,19 +77,15 @@ func (t Token) Show() string {
 
 type tokenParser struct {
 	s string
-	WordDecoder *mime.WordDecoder
 }
 
 func newTokenParser(s string) *tokenParser {
 	return &tokenParser{
 		s: s,
-		WordDecoder: new(mime.WordDecoder),
 	}
 }
 
-type TokenParser func() (Token, error)
-
-func (p *tokenParser) Parse() (tokens []Token, err error) {
+func (p *tokenParser) parse() (tokens []Token, err error) {
 	var tok Token
 	for p.len() > 0 {
 		tok, err = p.tokenize()
@@ -89,9 +93,6 @@ func (p *tokenParser) Parse() (tokens []Token, err error) {
 			break
 		}
 		tokens = append(tokens, tok)
-	}
-	if len(tokens) > 0 {
-		err = nil
 	}
 	return
 }
@@ -328,7 +329,7 @@ Loop:
 		case size == 0:
 			break Loop
 
-		case size == 1 && !isKeywords(r):
+		case size == 1 && !IsKeywords(r):
 			i += size
 
 		default:
@@ -350,11 +351,12 @@ func (p *tokenParser) quotedSymbol() (b byte, err error) {
 
 	b, err = p.slashed()
 	if err != nil {
-		c := p2.peek()
+		b = p2.peek()
 		*p = p2
-		if c != 32 {
+		if b != 34 {
 			p.s = p.s[1:]
-			return c, nil
+			err = nil
+			return
 		}
 
 		err = errors.New("end of quoted symbol")
@@ -365,7 +367,7 @@ func (p *tokenParser) quotedSymbol() (b byte, err error) {
 
 func (p *tokenParser) quotedString() (str string, err error) {
 	if !p.consume(34) {
-		return "", errors.New("invalid quoted string")
+		return "", errors.New("not a quoted string")
 	}
 	var buf strings.Builder
 	buf.WriteByte('"')
@@ -423,7 +425,7 @@ func (p *tokenParser) len() int {
 	return len(p.s)
 }
 
-func isKeywords(r rune) bool {
+func IsKeywords(r rune) bool {
 	switch r {
 	case '.', '~', '@', '#', '(', ')', '-', '+', '=', '<', '>', ' ', '"', ':':
 		return true

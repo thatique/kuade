@@ -12,8 +12,7 @@ var inputs = []string{
 
 func TestTokenize(t *testing.T) {
 	for i, inpt := range inputs {
-		p := newTokenParser(inpt)
-		tokens, err := p.Parse()
+		tokens, err := Tokenize(inpt)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}

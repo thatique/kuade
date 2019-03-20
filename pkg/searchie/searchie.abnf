@@ -1,0 +1,33 @@
+searchie   = *expression
+expression = terms / terms ws
+terms = [include] *label predicate
+
+include  = "+" / "-";
+
+label = label-meta / label-common
+label-common  = text ":"
+label-meta  = "@" text ":"
+
+value = '#' text / text
+
+;; predicate
+predicate = predicate-compare / predicate-like / predicate-range / predicate-contains
+predicate-like = "~" text
+predicate-range = value "." "." value
+predicate-contains = value
+predicate-compare = predicate-op value
+predicate-op = "=" / "<" / ">" / ">" "=" / "<" "=" / "<" ">"
+
+keywords = "." / "~" / "@" / "#" / "(" / ")" / "-" / "+" / "=" / "<" / ">" / ":" / "\t" / "\r" / "\n" / " " / quotation-mark;
+
+ws = *%x20
+
+;; text
+text = *basic-unescaped / quotation-mark *(escaped / basic-unescaped) quotation-mark;
+
+basic-unescaped = %x30-39 / %x41-5A / %x61-7A / %x80-10FFFF;
+escaped = escape escape-seq-char;
+
+escape = %x5C;
+escape-seq-char = "." / "~" / "@" / "#" / "(" / ")" / "-" / "+" / "=" / "<" / ">" / ":" / "\t" / "\r" / "\n" / " ";
+quotation-mark = %x22            ; "

@@ -19,7 +19,7 @@ func (t Term) Show() string {
 
 	return fmt.Sprintf(
 		"Term{Labels: [%s], Include: %v, Predicate: %v",
-		strings.Join(labels, ","),
+		strings.Join(labels, ", "),
 		t.Include,
 		t.Predicate.Show(),)
 }
@@ -30,15 +30,23 @@ type Label struct {
 
 func (label Label) Show() string {
 	if label.Common != "" {
-		return fmt.Sprintf("Meta{%s}", label.Meta)
+		return fmt.Sprintf("Common{%s}", label.Common)
 	}
 
-	return fmt.Sprintf("Common{%s}", label.Common)
+	return fmt.Sprintf("Meta{%s}", label.Meta)
 }
 
 type Value struct {
 	Text string
 	Tag  string
+}
+
+func (val Value) IsText() bool {
+	return val.Text != ""
+}
+
+func (val Value) IsTag() bool {
+	return val.Tag != ""
 }
 
 func (val Value) String() string {
@@ -54,7 +62,7 @@ func (val Value) Show() string {
 		return fmt.Sprintf("Tag{#%s}", val.Tag)
 	}
 
-	return fmt.Sprintf("Text{%s}", val.Tag)
+	return fmt.Sprintf("Text{%s}", val.Text)
 }
 
 type Predicate struct {
