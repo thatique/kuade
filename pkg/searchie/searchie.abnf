@@ -1,7 +1,17 @@
+;; This is an attempt to define `Searchie` syntax in ABNF according to the grammar
+;; defined in RFC 5234 (http://www.ietf.org/rfc/rfc5234.txt).
+;;
+;; You can try out this grammar using http://instaparse.mojombo.com/
+;; To do so, in the lower right, click on Options and change `:input-format` to
+;; ':abnf'. Then paste this entire ABNF document into the grammar entry box
+;; (above the options). Then you can type or paste a sample TOML document into
+;; the beige box on the left. Tada!
+
 searchie   = *expression
-expression = terms / terms ws
+expression = terms / terms condition term
 terms = [include] *label predicate
 
+;; include this term or negate them, if not specified parser should default to "+"
 include  = "+" / "-";
 
 label = label-meta / label-common
@@ -16,18 +26,33 @@ predicate-like = "~" text
 predicate-range = value "." "." value
 predicate-contains = value
 predicate-compare = predicate-op value
-predicate-op = "=" / "<" / ">" / ">" "=" / "<" "=" / "<" ">"
+predicate-op = "=" / "<" / ">" / ">" "=" / "<" "=" / "<" ">" / "!" "="
 
-keywords = "." / "~" / "@" / "#" / "(" / ")" / "-" / "+" / "=" / "<" / ">" / ":" / "\t" / "\r" / "\n" / " " / quotation-mark;
+;; conditions
+condition = condition-and / condition-or / ws
+condition-and = %x26  ; ampersand
+condition-or  = %x7C  ; vertical-bar
 
+;; chars that can't be used in query string wihout escape
+keywords = kw-without-quotation / quotation-mark;
+kw-without-quotation  = "." / "~" / "!" / "@" / "#" / "(" / ")" / "-" / "+" / "="
+kw-without-quotation  =/ "<" / ">" / ":" / "\t" / "\r" / "\n" / " "
+kw-wihout-quotation   =/ condition
+;; whitespace
 ws = *%x20
 
 ;; text
-text = *basic-unescaped / quotation-mark *(escaped / basic-unescaped) quotation-mark;
+text = *basic-unescaped / quoted-text
 
-basic-unescaped = %x30-39 / %x41-5A / %x61-7A / %x80-10FFFF;
-escaped = escape escape-seq-char;
+quoted-text  = quotation-mark *quoted-chars quotation-mark / escape keywords
+quoted-chars = basic-unescaped / kw-without-quotation
 
-escape = %x5C;
-escape-seq-char = "." / "~" / "@" / "#" / "(" / ")" / "-" / "+" / "=" / "<" / ">" / ":" / "\t" / "\r" / "\n" / " ";
+basic-unescaped = basic-punctuation / DIGIT / ALPHA / %x80-10FFFF;
+escaped = escape kw-without-quotation;
+basic-punctuation = %x2A / %x2F / %x3F / %x25 / %x27 / %x2C / %x3B
+
+escape = %x5C                    ; backslash
 quotation-mark = %x22            ; "
+
+ALPHA = %x41-5A / %x61-7A ; A-Z / a-z
+DIGIT = %x30-39 ; 0-9

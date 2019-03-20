@@ -427,7 +427,7 @@ func (p *tokenParser) len() int {
 
 func IsKeywords(r rune) bool {
 	switch r {
-	case '.', '~', '@', '#', '(', ')', '-', '+', '=', '<', '>', ' ', '"', ':':
+	case '.', '~', '!', '@', '#', '(', ')', '-', '+', '=', '<', '>', ' ', '"', ':', '|', '&':
 		return true
 	default:
 		return isWhitespace(r)

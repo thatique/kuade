@@ -7,15 +7,29 @@ import (
 	"github.com/thatique/kuade/pkg/searchie/tokens"
 )
 
-func NewQuery(s string) (terms []Term, err error) {
+func NewQuery(s string) (terms [][]Term, err error) {
 	var t Term
 	qs := splitBySpaces(strings.Trim(s, " \t\r\n"))
+	var isOr bool
 	for _, str := range qs {
+		if str == "|" {
+			isOr = true
+			continue
+		} else if str == "&" {
+			isOr = false
+			continue
+		} else {
+			isOr = false
+		}
 		t, err = NewTerm(str)
 		if err != nil {
 			return
 		}
-		terms = append(terms, t)
+		if isOr {
+			terms = conditionOr(terms, free(t))
+			continue
+		}
+		terms = conditionAnd(terms, free(t))
 	}
 	return
 }
@@ -420,4 +434,28 @@ func splitBySpaces(s string) []string {
 	xs = append(xs, buf.String())
 
 	return xs
+}
+
+func free(t Term) [][]Term {
+	return [][]Term{[]Term{t}}
+}
+
+func conditionAnd(t [][]Term, t2 [][]Term) [][]Term {
+	return sliceBind(t, func(xs []Term) [][]Term {
+		return sliceBind(t2, func(ys []Term) [][]Term {
+			return [][]Term{append(xs, ys...)}
+		})
+	})
+}
+
+func conditionOr(t [][]Term, t2 [][]Term) [][]Term {
+	return append(t, t2...)
+}
+
+func sliceBind(xs [][]Term, f func([]Term) [][]Term) [][]Term {
+	var result [][]Term
+	for _, terms := range xs {
+		result = append(result, f(terms)...)
+	}
+	return result
 }
