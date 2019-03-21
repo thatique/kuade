@@ -11,7 +11,7 @@ import (
 
 // Statement - policy statement.
 type Statement struct {
-	SID        ID                  `json:"Sid,omitempty" bson:"SID,omitempty"`
+	SID        ID                  `json:"Sid,omitempty" bson:"sid,omitempty"`
 	Effect     Effect              `json:"Effect" bson:"effect"`
 	Principal  Principal           `json:"Principal" bson:"principal"`
 	Actions    ActionSet           `json:"Action" bson:"action"`

@@ -7,10 +7,11 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/minio/minio-go/pkg/set"
+	"github.com/thatique/kuade/pkg/arn"
 )
 
 // ResourceSet - set of ARN in policy statement.
-type ResourceSet map[Resource]struct{}
+type ResourceSet map[arn.ARN]struct{}
 
 // bucketResourceExists - checks if at least one resource exists in the set.
 func (resourceSet ResourceSet) resourceExists() bool {
@@ -35,7 +36,7 @@ func (resourceSet ResourceSet) objectResourceExists() bool {
 }
 
 // Add - adds resource to resource set.
-func (resourceSet ResourceSet) Add(resource Resource) {
+func (resourceSet ResourceSet) Add(resource arn.ARN) {
 	resourceSet[resource] = struct{}{}
 }
 
@@ -57,7 +58,7 @@ func (resourceSet ResourceSet) MarshalJSON() ([]byte, error) {
 		return nil, fmt.Errorf("empty resource set")
 	}
 
-	resources := []Resource{}
+	resources := []arn.ARN{}
 	for resource := range resourceSet {
 		resources = append(resources, resource)
 	}
@@ -70,7 +71,7 @@ func (resourceSet ResourceSet) GetBSON() (interface{}, error) {
 		return nil, fmt.Errorf("empty resource set")
 	}
 
-	resources := []Resource{}
+	resources := []arn.ARN{}
 	for resource := range resourceSet {
 		resources = append(resources, resource)
 	}
@@ -108,7 +109,7 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 
 	*resourceSet = make(ResourceSet)
 	for _, s := range sset.ToSlice() {
-		resource, err := ParseARN(s)
+		resource, err := arn.ParseARN(s)
 		if err != nil {
 			return err
 		}
@@ -131,7 +132,7 @@ func (resourceSet *ResourceSet) SetBSON(raw bson.Raw) error {
 
 	*resourceSet = make(ResourceSet)
 	for _, s := range sset.ToSlice() {
-		resource, err := ParseARN(s)
+		resource, err := arn.ParseARN(s)
 		if err != nil {
 			return err
 		}
@@ -158,7 +159,7 @@ func (resourceSet ResourceSet) Validate(bucketName string) error {
 }
 
 // NewResourceSet - creates new resource set.
-func NewResourceSet(resources ...Resource) ResourceSet {
+func NewResourceSet(resources ...arn.ARN) ResourceSet {
 	resourceSet := make(ResourceSet)
 	for _, resource := range resources {
 		resourceSet.Add(resource)

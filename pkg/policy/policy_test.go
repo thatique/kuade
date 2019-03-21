@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/thatique/kuade/pkg/policy/condition"
+	"github.com/thatique/kuade/pkg/arn"
 )
 
 func TestIsPolicyAllowed(t *testing.T) {
@@ -15,7 +16,7 @@ func TestIsPolicyAllowed(t *testing.T) {
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(Action("s3:GetBucketLocation"), Action("s3:PutObject")),
-				NewResourceSet(Resource{Partition: "aws", Service: "s3", Resource: "*"}),
+				NewResourceSet(arn.ARN{Partition: "aws", Service: "s3", Resource: "*"}),
 				condition.NewFunctions(),
 			),
 		},
@@ -28,7 +29,7 @@ func TestIsPolicyAllowed(t *testing.T) {
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(Action("s3:GetObject"), Action("s3:PutObject")),
-				NewResourceSet(Resource{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
+				NewResourceSet(arn.ARN{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
 				condition.NewFunctions(),
 			)},
 	}
@@ -52,7 +53,7 @@ func TestIsPolicyAllowed(t *testing.T) {
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(Action("s3:GetObject"), Action("s3:PutObject")),
-				NewResourceSet(Resource{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
+				NewResourceSet(arn.ARN{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
 				condition.NewFunctions(func1),
 			)},
 	}
@@ -64,7 +65,7 @@ func TestIsPolicyAllowed(t *testing.T) {
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(Action("s3:GetObject"), Action("s3:PutObject")),
-				NewResourceSet(Resource{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
+				NewResourceSet(arn.ARN{Partition: "aws", Service: "s3", Resource: "mybucket/myobject*"}),
 				condition.NewFunctions(func1),
 			)},
 	}
