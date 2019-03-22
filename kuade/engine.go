@@ -19,8 +19,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/thatique/kuade/configuration"
-	"github.com/thatique/kuade/pkg/uuid"
 	"github.com/thatique/kuade/kuade/listener"
+	"github.com/thatique/kuade/pkg/uuid"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
 	"github.com/thatique/kuade/version"
 )

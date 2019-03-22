@@ -107,15 +107,22 @@ type Profile struct {
 	State   string `json:"state,omitempty"`
 }
 
+type Credentials struct {
+	Enabled    bool      `xml:"Enabled" json:"enabled"`
+	Password   []byte    `xml:"-" json:"-"`
+	CreatedAt  time.Time `xml:"CreatedAt" json:"createdAt"`
+	LastSignin time.Time `xml:"LastSignin" json:"lastSignin"`
+}
+
 type User struct {
-	Id        bson.ObjectId `json:"id"`
-	Slug      string        `json:"slug"`
-	Profile   Profile       `json:"profile,omitempty"`
-	Email     string        `json:"email"`
-	Password  []byte        `json:"-"`
-	Status    UserStatus    `json:"status"`
-	Role      Role          `json:"-"`
-	CreatedAt time.Time     `json:"created_at"`
+	Id          bson.ObjectId `xml:"Id" json:"id"`
+	Slug        string        `xml:"Slug" json:"slug"`
+	Profile     Profile       `xml:"Profile" json:"profile,omitempty"`
+	Email       string        `xml:"-" json:"-"`
+	Credentials Credentials   `xml:"Credentials" json:"credentials"`
+	Status      UserStatus    `json:"status"`
+	Role        Role          `json:"-"`
+	CreatedAt   time.Time     `json:"created_at"`
 }
 
 type OAuthProvider struct {
@@ -138,6 +145,7 @@ type UserStore interface {
 	// list returns a list of users from the datastore.
 	List(ctx context.Context, pagination types.PaginationArgs) ([]*User, error)
 
+	// Create user
 	Create(ctx context.Context, user *User) error
 
 	// Update persists an updated user to the datastore.
@@ -159,12 +167,12 @@ func (user *User) SetPassword(pswd []byte) error {
 	if err != nil {
 		return err
 	}
-	user.Password = b
+	user.Credentials.Password = b
 	return nil
 }
 
 func (user *User) VerifyPassword(pswd []byte) bool {
-	if err := bcrypt.CompareHashAndPassword(user.Password, pswd); err != nil {
+	if err := bcrypt.CompareHashAndPassword(user.Credentials.Password, pswd); err != nil {
 		return false
 	}
 

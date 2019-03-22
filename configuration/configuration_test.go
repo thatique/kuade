@@ -83,6 +83,11 @@ var configStruct = Configuration{
 		DB:       1,
 	},
 
+	Queue: Queue{
+		MaxWorkers: 3,
+		MaxQueue:   100,
+	},
+
 	Storage: Storage{
 		"mongodb": Parameters{
 			"url": "mongodb://localhost:2703/db",
@@ -112,6 +117,9 @@ redis:
   addr: localhost
   password: secret
   db: 1
+queue:
+  maxworkers: 3
+  maxqueue: 100
 storage:
   mongodb:
     url: mongodb://localhost:2703/db
@@ -165,6 +173,7 @@ func copyConfig(config Configuration) *Configuration {
 		configCopy.HTTP.Headers[k] = v
 	}
 
+	configCopy.Queue = config.Queue
 	configCopy.Redis = config.Redis
 	configCopy.Storage = config.Storage
 

@@ -4,8 +4,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/thatique/kuade/pkg/policy/condition"
 	"github.com/thatique/kuade/pkg/arn"
+	"github.com/thatique/kuade/pkg/policy/condition"
 )
 
 func TestIsPolicyAllowed(t *testing.T) {

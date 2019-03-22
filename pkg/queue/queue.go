@@ -101,7 +101,7 @@ func (q *Queue) Later(expired time.Duration, job Job) {
 
 	q.exps.ReplaceOrInsert(&delayedJob{
 		id:    uuid.Generate(),
-		delay: time.Now().UTC().Add(expired),
+		delay: time.Now().Add(expired),
 		job:   job,
 	})
 }
@@ -112,7 +112,7 @@ func (q *Queue) getExpiredJobs() []*delayedJob {
 	var expired []*delayedJob
 	q.exps.AscendLessThan(&delayedJob{
 		id:    defaultUUID,
-		delay: time.Now().UTC(),
+		delay: time.Now(),
 	}, func(item btree.Item) bool {
 		expired = append(expired, item.(*delayedJob))
 		return true
@@ -160,11 +160,11 @@ func (q *Queue) backgroundManager() {
 	defer t.Stop()
 	for {
 		select {
+		case <-q.quitChan:
+			return
 		case <-t.C:
 			d := q.processExpiredJobs(q.getExpiredJobs())
 			<-d
-		case <-q.quitChan:
-			return
 		}
 	}
 }

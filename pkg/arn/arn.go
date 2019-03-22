@@ -11,12 +11,12 @@ import (
 )
 
 type ARN struct {
-	Partition    string
-	Service      string
-	Region       string
-	Account      string
+	Partition string
+	Service   string
+	Region    string
+	Account   string
 	//
-	Resource     string
+	Resource string
 }
 
 func (arn ARN) IsResourcePattern() bool {

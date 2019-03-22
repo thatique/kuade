@@ -12,7 +12,7 @@ type IfRequestMiddleware struct {
 }
 
 func NewIfRequestMiddleware(middlewares []mux.MiddlewareFunc, predicate func(*http.Request) bool) *IfRequestMiddleware {
-	return &IfRequestMiddleware{predicate: predicate, middlewares: middlewares,}
+	return &IfRequestMiddleware{predicate: predicate, middlewares: middlewares}
 }
 
 func (mw *IfRequestMiddleware) Middleware(next http.Handler) http.Handler {

@@ -13,11 +13,11 @@ import (
 type MailNotifier struct {
 	Sender    string
 	transport mailer.Transport
-	channel   chan<- queue.Job
+	queue     *queue.Queue
 }
 
-func NewMailNotifier(sender string, m mailer.Transport, c chan<- queue.Job) *MailNotifier {
-	return &MailNotifier{Sender: sender, transport: m, channel: c}
+func NewMailNotifier(sender string, m mailer.Transport, q *queue.Queue) *MailNotifier {
+	return &MailNotifier{Sender: sender, transport: m, queue: q}
 }
 
 func (n *MailNotifier) Notify(user *auth.User, body io.Reader) error {
@@ -43,6 +43,6 @@ func (n *MailNotifier) Notify(user *auth.User, body io.Reader) error {
 		return err
 	}
 
-	n.channel <- mailer.NewJobMail(n.transport, []*message.Entity{msg})
+	n.queue.Push(mailer.NewJobMail(n.transport, []*message.Entity{msg}))
 	return nil
 }

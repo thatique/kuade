@@ -25,21 +25,28 @@ type dbProfile struct {
 	State   string `bson:"state,omitempty"`
 }
 
+type dbCredentials struct {
+	Enabled    bool      `bson:"enabled"`
+	Password   []byte    `bson:"password"`
+	CreatedAt  time.Time `bson:"createdAt"`
+	LastSignin time.Time `bson:"lastSignin"`
+}
+
 type userProvider struct {
 	Name string `bson:"name"`
 	Key  string `bson:"key"`
 }
 
 type userMgo struct {
-	Id        bson.ObjectId   `bson:"_id,omitempty"`
-	Slug      string          `bson:"slug"`
-	Profile   dbProfile       `bson:"profile,omitempty"`
-	Email     string          `bson:"email"`
-	Password  []byte          `bson:"password"`
-	Status    auth.UserStatus `bson:"status"`
-	Role      auth.Role       `bson:"role"`
-	CreatedAt time.Time       `bson:"created_at"`
-	Providers []userProvider  `bson:"identities"`
+	Id          bson.ObjectId   `bson:"_id,omitempty"`
+	Slug        string          `bson:"slug"`
+	Profile     dbProfile       `bson:"profile,omitempty"`
+	Email       string          `bson:"email"`
+	Credentials dbCredentials   `bson:"credentials"`
+	Status      auth.UserStatus `bson:"status"`
+	Role        auth.Role       `bson:"role"`
+	CreatedAt   time.Time       `bson:"created_at"`
+	Providers   []userProvider  `bson:"identities,omitempty"`
 }
 
 func (user *userMgo) Col() string {
@@ -110,8 +117,13 @@ func fromAuthModel(user *auth.User) *userMgo {
 			City:    user.Profile.City,
 			State:   user.Profile.State,
 		},
-		Email:     user.Email,
-		Password:  user.Password,
+		Email: user.Email,
+		Credentials: dbCredentials{
+			Enabled:    user.Credentials.Enabled,
+			Password:   user.Credentials.Password,
+			CreatedAt:  user.Credentials.CreatedAt,
+			LastSignin: user.Credentials.LastSignin,
+		},
 		Status:    user.Status,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
@@ -131,8 +143,13 @@ func toAuthModel(user *userMgo) *auth.User {
 			City:    user.Profile.City,
 			State:   user.Profile.State,
 		},
-		Email:     user.Email,
-		Password:  user.Password,
+		Email: user.Email,
+		Credentials: auth.Credentials{
+			Enabled:    user.Credentials.Enabled,
+			Password:   user.Credentials.Password,
+			CreatedAt:  user.Credentials.CreatedAt,
+			LastSignin: user.Credentials.LastSignin,
+		},
 		Status:    user.Status,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,

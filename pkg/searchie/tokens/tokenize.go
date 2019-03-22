@@ -210,7 +210,7 @@ func (p *tokenParser) raw() (tok Token, err error) {
 		return Token{}, err
 	}
 
-	return Token{Kind: TokenText, Text: raw,}, nil
+	return Token{Kind: TokenText, Text: raw}, nil
 }
 
 func (p *tokenParser) quoted() (tok Token, err error) {
@@ -219,7 +219,7 @@ func (p *tokenParser) quoted() (tok Token, err error) {
 		return Token{}, err
 	}
 
-	return Token{Kind: TokenText, Text: raw,}, nil
+	return Token{Kind: TokenText, Text: raw}, nil
 }
 
 func (p *tokenParser) ranged() (tok Token, err error) {
@@ -338,7 +338,7 @@ Loop:
 	}
 
 	if i == 0 {
-		return "",  fmt.Errorf("empty raw string: %q", p.s)
+		return "", fmt.Errorf("empty raw string: %q", p.s)
 	}
 
 	raw, p.s = p.s[:i], p.s[i:]

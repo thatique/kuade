@@ -9,7 +9,7 @@ type RequestSizeLimit struct {
 }
 
 func NewRequestLimiter(maxBodySize int64) *RequestSizeLimit {
-	return &RequestSizeLimit{maxBodySize: maxBodySize,}
+	return &RequestSizeLimit{maxBodySize: maxBodySize}
 }
 
 func (limiter *RequestSizeLimit) Middleware(next http.Handler) http.Handler {

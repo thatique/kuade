@@ -113,10 +113,18 @@ type Configuration struct {
 		} `yaml:"debug,omitempty"`
 	} `yaml:"http,omitempty"`
 
+	Queue Queue `yaml:"queue,omitempty"`
+
 	Redis Redis `yaml:"redis,omitempty"`
 
 	// Storage is the configuration for the registry's storage driver
 	Storage Storage `yaml:"storage"`
+}
+
+// Queue settings
+type Queue struct {
+	MaxWorkers int `yaml:"maxworkers,omitempty"`
+	MaxQueue   int `yaml:"maxqueue,omitempty"`
 }
 
 // LogHook is composed of hook Level and Type.
@@ -352,7 +360,7 @@ func Parse(rd io.Reader) (*Configuration, error) {
 		return nil, err
 	}
 
-	p := NewParser("thatiq", []VersionedParseInfo{
+	p := NewParser("kuade", []VersionedParseInfo{
 		{
 			Version: MajorMinorVersion(0, 1),
 			ParseAs: reflect.TypeOf(v0_1Configuration{}),

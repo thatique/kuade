@@ -46,7 +46,7 @@ func NewTerm(s string) (term Term, err error) {
 
 type searchParser struct {
 	tokens []tokens.Token
-	p int
+	p      int
 }
 
 func newSearchParser(t []tokens.Token) *searchParser {
@@ -93,7 +93,7 @@ func (p *searchParser) Parse() (term Term, err error) {
 		return
 	}
 
-	term = Term{Include: included, Labels: labels, Predicate: pred,}
+	term = Term{Include: included, Labels: labels, Predicate: pred}
 	return
 }
 
@@ -406,9 +406,9 @@ func (p *searchParser) when(pred func(tokens.Token) bool) (t tokens.Token, err e
 
 func splitBySpaces(s string) []string {
 	var (
-		xs []string
+		xs     []string
 		quoted bool
-		buf strings.Builder
+		buf    strings.Builder
 	)
 	for _, r := range s {
 		if r == 34 {

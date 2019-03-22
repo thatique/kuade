@@ -59,7 +59,7 @@ func (t *RedisToken) Generate(user *auth.User) (token string, err error) {
 	tok := &tokens.PasswordToken{
 		Token:     token,
 		Email:     user.Email,
-		Pass:      user.Password,
+		Pass:      user.Credentials.Password,
 		CreatedAt: time.Now().UTC().Unix(),
 	}
 
@@ -117,7 +117,7 @@ func (t *RedisToken) IsValid(user *auth.User, token string) bool {
 		return false
 	}
 
-	if stored.Email != user.Email || stored.Token != token || subtle.ConstantTimeCompare(stored.Pass, user.Password) != 1 {
+	if stored.Email != user.Email || stored.Token != token || subtle.ConstantTimeCompare(stored.Pass, user.Credentials.Password) != 1 {
 		return false
 	}
 

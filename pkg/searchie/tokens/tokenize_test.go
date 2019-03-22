@@ -21,7 +21,7 @@ func showTokens(tokens []Token) string {
 }
 
 func TestTokenize(t *testing.T) {
-	var cases = []struct{
+	var cases = []struct {
 		input  string
 		tokens []Token
 		valid  bool

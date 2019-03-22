@@ -6,8 +6,8 @@ import (
 )
 
 type Term struct {
-	Include bool
-	Labels []Label
+	Include   bool
+	Labels    []Label
 	Predicate Predicate
 }
 
@@ -21,7 +21,7 @@ func (t Term) Show() string {
 		"Term{Labels: [%s], Include: %v, Predicate: %v",
 		strings.Join(labels, ", "),
 		t.Include,
-		t.Predicate.Show(),)
+		t.Predicate.Show())
 }
 
 type Label struct {
