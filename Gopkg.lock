@@ -18,7 +18,7 @@
   version = "v0.4.1"
 
 [[projects]]
-  digest = "1:aeb8a3c88503ace4a5ac883491fcff76a610636ba9dc4753dc18740aae5cc937"
+  digest = "1:9c410dafb5e44ddd1c11ebf4e4d981f945beadab11522978d8dca77b0e9dc09b"
   name = "github.com/bugsnag/bugsnag-go"
   packages = [
     ".",
@@ -28,8 +28,8 @@
     "sessions",
   ]
   pruneopts = "UT"
-  revision = "834d8fee64233ea79b0389ad7a5a438261788f66"
-  version = "v1.4.0"
+  revision = "939b556eb50a4ea47db60978c5662e1763e0f2f7"
+  version = "v1.4.1"
 
 [[projects]]
   digest = "1:3049c43c6d1cfaa347acd27d6342187f8f38d9f416bbba7b02b43f82848302d2"
@@ -40,15 +40,15 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:90f6e3a87e2647608b03bd474a485af2dffadcf3c7108d39f01b6f46e8aafec8"
+  digest = "1:52a8e3f8a2c8eb7f062a8f831db4adcce0fb1fd9547f317475e6bc61736e402a"
   name = "github.com/emersion/go-message"
   packages = [
     ".",
     "charset",
   ]
   pruneopts = "UT"
-  revision = "f7e2be8074d097a816a1f5bd9d502adc46275d4a"
-  version = "v0.9.1"
+  revision = "63ac8399c1e4c07ca2a233b0fa6d205694c7bdbe"
+  version = "v0.9.2"
 
 [[projects]]
   branch = "master"
@@ -100,12 +100,28 @@
   version = "v2.0.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
   name = "github.com/google/btree"
   packages = ["."]
   pruneopts = "UT"
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:c6c7d7d1c2a4f9845f37c6f17f83fe1adcb41bebc891b94cd1ef95be1ce6b5e7"
+  name = "github.com/gorilla/csrf"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "05b4a732b984ec326cac085631060968d4706b17"
+  version = "v1.5.1"
 
 [[projects]]
   digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
@@ -177,7 +193,7 @@
   name = "github.com/minio/minio"
   packages = ["pkg/wildcard"]
   pruneopts = "UT"
-  revision = "eb69c4f946ce10f5996566f9ee4c550a3119aeae"
+  revision = "22b4fe0a51bc58a63a11b3d5311b17bb5909f70c"
 
 [[projects]]
   digest = "1:90bd837cc278cfe1d698a0a25b585f920b2f7fed395c95ce9bf8ce643ca9d945"
@@ -208,6 +224,14 @@
   packages = ["llrb"]
   pruneopts = "UT"
   revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
+
+[[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
@@ -242,9 +266,12 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:af47085335474571b48650a705ca90f01c57608d8477d8646ed3588b493462fc"
+  digest = "1:beae38eed7f6ea5857aec9fc8785b3b40910e377d258d5bd4993df0afa1e5028"
   name = "github.com/syaiful6/sersan"
-  packages = ["."]
+  packages = [
+    ".",
+    "redis",
+  ]
   pruneopts = "UT"
   revision = "d37153931fb0c5c2ae2d7d94d1528879cfe01b73"
   version = "v0.1.0"
@@ -267,7 +294,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
 
 [[projects]]
   branch = "master"
@@ -278,29 +305,29 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "9f648a60d9775ef5c977e7669d1673a7a67bef33"
+  revision = "addf6b3196f61cd44ce5a76657913698c73479d0"
 
 [[projects]]
   branch = "master"
-  digest = "1:037497a2c592b7aa03789f9d6492d02e7d7d166c0e363c95cb53952cf11c7ab0"
+  digest = "1:9927d6aceb89d188e21485f42a7a254e67e6fdcf4260aba375fe18e3c300dfb4"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
+  revision = "c85d3e98c914e3a33234ad863dcbff5dbc425bb8"
 
 [[projects]]
   branch = "master"
-  digest = "1:ed708ad22c955df62e7eaba9ddd9edd3afc7818a4a72d9680bf797ac6c5ae3a8"
+  digest = "1:6b3e6ddcebac95be1d690dbd53b5aa2e520715becb7e521bb526ccf3b4c53c15"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a2f829d7f35f2ed1c3520c553a6226495455cae0"
+  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
 
 [[projects]]
   digest = "1:8eae63fdad880f0a261f473523e0f66b9be0361360d9d42c7b499227070ff5af"
@@ -330,7 +357,7 @@
   revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
 [[projects]]
-  digest = "1:6f3bd49ddf2e104e52062774d797714371fac1b8bddfd8e124ce78e6b2264a10"
+  digest = "1:6eb6e3b6d9fffb62958cf7f7d88dbbe1dd6839436b0802e194c590667a40412a"
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -342,8 +369,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
-  version = "v1.4.0"
+  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
+  version = "v1.5.0"
 
 [[projects]]
   branch = "v1"
@@ -373,6 +400,7 @@
     "github.com/globalsign/mgo/bson",
     "github.com/gomodule/redigo/redis",
     "github.com/google/btree",
+    "github.com/gorilla/csrf",
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/minio/minio-go/pkg/s3utils",
@@ -383,6 +411,7 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/syaiful6/sersan",
+    "github.com/syaiful6/sersan/redis",
     "github.com/syaiful6/thatique/uuid",
     "golang.org/x/crypto/bcrypt",
     "golang.org/x/oauth2",

@@ -40,6 +40,7 @@ type userInfoContext struct {
 	user *User
 }
 
+
 func (uic userInfoContext) Value(key interface{}) interface{} {
 	switch key {
 	case userCtxKey:
@@ -49,6 +50,24 @@ func (uic userInfoContext) Value(key interface{}) interface{} {
 	}
 
 	return uic.Context.Value(key)
+}
+
+// Middleware that load user from session and set it current user if success
+func (sess *Session) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, err := sess.loadUserFromSession(r)
+		if err != nil {
+			if err == UserSessionDoesnotExist {
+				session, err := sersan.GetSession(r)
+				if err == nil {
+					delete(session, UserSessionKey)
+				}
+			}
+			next.ServeHTTP(w, r)
+			return
+		}
+		next.ServeHTTP(w, sess.LoginOnce(r, user))
+	})
 }
 
 // get current user, return user if any
@@ -79,6 +98,24 @@ func (sess *Session) Login(r *http.Request, u *User) (*http.Request, error) {
 	return r, nil
 }
 
+// logout user from application, remove userInfoContext if it can
+func (sess *Session) Logout(r *http.Request) (*http.Request, error) {
+	session, err := sersan.GetSession(r)
+	if err != nil {
+		return nil, err
+	}
+
+	delete(session, UserSessionKey)
+
+	// remove user from context
+	ctx, ok := r.Context().(userInfoContext)
+	if !ok {
+		return r, nil
+	}
+
+	return r.WithContext(ctx.Context), nil
+}
+
 // update session
 func (sess *Session) updateSession(r *http.Request, u *User) error {
 	sessionMap, err := sersan.GetSession(r)
@@ -101,10 +138,6 @@ func (sess *Session) loadUserFromSession(r *http.Request) (*User, error) {
 		uid  string
 		suid interface{}
 	)
-
-	if err != nil {
-		return nil, err
-	}
 
 	if suid, ok = sessionMap[UserSessionKey]; !ok {
 		return nil, UserSessionDoesnotExist

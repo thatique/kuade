@@ -1,4 +1,4 @@
-package kuade
+package service
 
 import (
 	"net/smtp"
@@ -41,6 +41,10 @@ func NewService(conf *configuration.Configuration) (*Service, error) {
 		Mailer:  mailer,
 		Config:  conf,
 	}, nil
+}
+
+func (service *Service) Quit() {
+	service.Queue.Stop()
 }
 
 func configureQueue(conf configuration.Queue) *queue.Queue {
