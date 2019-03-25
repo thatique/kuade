@@ -14,24 +14,26 @@ import (
 	"github.com/syaiful6/sersan"
 	redistore "github.com/syaiful6/sersan/redis"
 
+	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/kuade"
 	"github.com/thatique/kuade/kuade/auth"
-	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/kuade/service"
-	"github.com/thatique/kuade/pkg/web/handlers"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
+	"github.com/thatique/kuade/pkg/web/handlers"
 )
 
 type App struct {
 	context.Context
+	// assets function
+	asset func(string) ([]byte, error)
 
 	authSess *auth.Session
 	router   *mux.Router
 	service  *service.Service
 }
 
-func NewApp() kuade.Application {
-	return &App{}
+func NewApp(asset func(string) ([]byte, error)) kuade.Application {
+	return &App{asset: asset}
 }
 
 func (app *App) GetService() *service.Service {
@@ -48,7 +50,7 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 
 	router := routerWithPrefix(conf.HTTP.Prefix)
 	app.service = svc
-	app.router  = router
+	app.router = router
 
 	userStorage, err := svc.Storage.GetUserStorage()
 	if err != nil {
@@ -67,7 +69,12 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 		app.authSess.Middleware,
 		csrf.Protect([]byte(conf.HTTP.Secret), csrf.Secure(conf.HTTP.Secure)),
 	}, isNotApiRoute)
+	// middleware
 	app.router.Use(webMiddlewares.Middleware)
+
+	// static files
+	app.router.PathPrefix("/static/").Handler(
+		http.StripPrefix("/static/", http.FileServer(handlers.NewStaticFS("assets/static", app.asset))))
 
 	return app, nil
 }
@@ -112,6 +119,9 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare the context with our own little decorations.
 	ctx := app.context(w, r)
+	ctx = webcontext.WithRequest(ctx, r)
+	ctx, w = webcontext.WithResponseWriter(ctx, w)
+	ctx = webcontext.WithLogger(ctx, webcontext.GetRequestLogger(ctx))
 	// sync the context
 	r = r.WithContext(ctx)
 
@@ -133,15 +143,12 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // context constructs the context object for the application. This only be
 // called once per request.
-func (app *App) context(w http.ResponseWriter, r *http.Request) *Context {
+func (app *App) context(w http.ResponseWriter, r *http.Request) context.Context {
 	ctx := r.Context()
 	ctx = webcontext.WithVars(ctx, r)
 	ctx = webcontext.WithLogger(ctx, webcontext.GetLogger(ctx,
 		"vars.name",
 		"vars.uuid"))
-	ctx = webcontext.WithRequest(ctx, r)
-	ctx, w = webcontext.WithResponseWriter(ctx, w)
-	ctx = webcontext.WithLogger(ctx, webcontext.GetRequestLogger(ctx))
 
 	return &Context{
 		App:     app,

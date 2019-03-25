@@ -19,7 +19,7 @@ type dbProfile struct {
 	Picture string `bson:"picture,omitempty"`
 	Bio     string `bson:"bio,omitempty"`
 
-	Age     int32  `bson:"age,omitempty"`
+	Age     uint8  `bson:"age,omitempty"`
 	Address string `bson:"address,omitempty"`
 	City    string `bson:"city,omitempty"`
 	State   string `bson:"state,omitempty"`

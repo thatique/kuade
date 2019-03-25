@@ -1,20 +1,24 @@
-package smtptransport
+package smtp
 
 import (
 	"crypto/tls"
 	"errors"
-	"github.com/emersion/go-message"
 	"net"
 	"net/mail"
 	"net/smtp"
+	"strings"
 	"sync"
+
+	"github.com/emersion/go-message"
 )
 
 type Options struct {
 	// The addr must include a port, as in "mail.example.com:smtp".
 	Addr string
-	// Authentication
-	Auth smtp.Auth
+	// Username is the username to use to authenticate to the SMTP server.
+	Username string
+	// Password is the password to use to authenticate to the SMTP server.
+	Password string
 }
 
 type SMTPTransport struct {
@@ -60,14 +64,28 @@ func (t *SMTPTransport) Open() error {
 	}
 
 	// auth is non nil
-	if t.option.Auth != nil {
-		if ok, _ := c.Extension("AUTH"); !ok {
-			return errors.New("mailer.smptp: server doesn't support AUTH")
+	if t.option.Username != "" {
+		if ok, auths := c.Extension("AUTH"); ok {
+			var auth smtp.Auth
+			if strings.Contains(auths, "CRAM-MD5") {
+				auth = smtp.CRAMMD5Auth(t.option.Username, t.option.Password)
+			} else if strings.Contains(auths, "LOGIN") &&
+				!strings.Contains(auths, "PLAIN") {
+				auth = &loginAuth{
+					username: t.option.Username,
+					password: t.option.Password,
+					host:     t.serverName,
+				}
+			} else {
+				auth = smtp.PlainAuth("", t.option.Username, t.option.Password, t.serverName)
+			}
+
+			if err = c.Auth(auth); err != nil {
+				return err
+			}
 		}
 
-		if err = c.Auth(t.option.Auth); err != nil {
-			return err
-		}
+		return errors.New("mailer.smptp: server doesn't support AUTH")
 	}
 
 	// connection establish, store it and return

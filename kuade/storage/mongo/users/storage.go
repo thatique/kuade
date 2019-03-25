@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/kuade/api/types"
 	"github.com/thatique/kuade/kuade/auth"
+	"github.com/thatique/kuade/kuade/storage"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
 )
 
@@ -22,6 +24,9 @@ func (conn *MgoUserStore) FindById(ctx context.Context, id bson.ObjectId) (user 
 	var dbuser *userMgo
 	err = conn.c.C(dbuser).FindId(id).One(&dbuser)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = storage.ErrNotFound
+		}
 		return
 	}
 	user = toAuthModel(dbuser)
@@ -32,6 +37,9 @@ func (conn *MgoUserStore) FindByEmail(ctx context.Context, email string) (user *
 	var dbuser *userMgo
 	err = conn.c.Find(dbuser, bson.M{"email": email}).One(&dbuser)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = storage.ErrNotFound
+		}
 		return
 	}
 	user = toAuthModel(dbuser)
@@ -42,6 +50,9 @@ func (conn *MgoUserStore) FindBySlug(ctx context.Context, slug string) (user *au
 	var dbuser *userMgo
 	err = conn.c.Find(dbuser, bson.M{"slug": slug}).One(&dbuser)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = storage.ErrNotFound
+		}
 		return
 	}
 	user = toAuthModel(dbuser)
@@ -103,10 +114,15 @@ func (conn *MgoUserStore) List(ctx context.Context, pagination types.PaginationA
 	return
 }
 
-func (conn *MgoUserStore) Create(ctx context.Context, user *auth.User) (err error) {
+func (conn *MgoUserStore) Create(ctx context.Context, user *auth.User) (id bson.ObjectId, err error) {
 	dbuser := fromAuthModel(user)
-	err = conn.c.C(dbuser).Insert(dbuser)
-	return
+	info, err := conn.c.Upsert(dbuser)
+
+	id, ok := info.UpsertedId.(bson.ObjectId)
+	if !ok {
+		return bson.ObjectId(""), err
+	}
+	return id, nil
 }
 
 func (conn *MgoUserStore) Update(ctx context.Context, user *auth.User) (err error) {
@@ -118,6 +134,17 @@ func (conn *MgoUserStore) Update(ctx context.Context, user *auth.User) (err erro
 	dbuser := fromAuthModel(user)
 	err = conn.c.C(dbuser).UpdateId(dbuser.Id, bson.M{"$set": dbuser})
 	return
+}
+
+func (conn *MgoUserStore) UpdateCredentials(ctx context.Context, id bson.ObjectId, creds auth.Credentials) error {
+	var dbCreds = dbCredentials{
+		Enabled:    creds.Enabled,
+		Password:   creds.Password,
+		CreatedAt:  creds.CreatedAt,
+		LastSignin: creds.LastSignin,
+	}
+	err := conn.c.C(&userMgo{}).UpdateId(id, bson.M{"$set": bson.M{"credentials": dbCreds}})
+	return err
 }
 
 func (conn *MgoUserStore) Delete(ctx context.Context, user *auth.User) (err error) {

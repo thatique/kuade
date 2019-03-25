@@ -101,7 +101,7 @@ type Profile struct {
 	Picture string `json:"picture,omitempty"`
 	Bio     string `json:"bio,omitempty"`
 
-	Age     int32  `json:"age,omitempty"`
+	Age     uint8  `json:"age,omitempty"`
 	Address string `json:"address,omitempty"`
 	City    string `json:"city,omitempty"`
 	State   string `json:"state,omitempty"`
@@ -146,10 +146,13 @@ type UserStore interface {
 	List(ctx context.Context, pagination types.PaginationArgs) ([]*User, error)
 
 	// Create user
-	Create(ctx context.Context, user *User) error
+	Create(ctx context.Context, user *User) (bson.ObjectId, error)
 
 	// Update persists an updated user to the datastore.
 	Update(context.Context, *User) error
+
+	// Update user credentials
+	UpdateCredentials(context.Context, bson.ObjectId, Credentials) error
 
 	// Delete deletes a user from the datastore.
 	Delete(context.Context, *User) error

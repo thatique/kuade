@@ -1,4 +1,4 @@
-package service
+package validation
 
 type Result struct {
 	Ok     bool

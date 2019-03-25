@@ -1,7 +1,6 @@
 package service
 
 import (
-	"net/smtp"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -125,10 +124,9 @@ func setupSMTPTransport(conf configuration.Mail) mailer.Transport {
 	}
 
 	options := &smtptransport.Options{
-		Addr: addr,
-	}
-	if conf.SMTP.Username != "" && conf.SMTP.Password != "" {
-		options.Auth = smtp.CRAMMD5Auth(conf.SMTP.Username, conf.SMTP.Password)
+		Addr:     addr,
+		Username: conf.SMTP.Username,
+		Password: conf.SMTP.Password,
 	}
 
 	return smtptransport.NewSMTPTransport(options)

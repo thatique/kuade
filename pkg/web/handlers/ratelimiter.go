@@ -80,7 +80,7 @@ func (rl *RateLimiter) cleanup() {
 		case <-rl.done:
 			rl.lock.Lock()
 			if rl.visitors == nil {
-				rl.visitors = make(map[string]*visitor)
+				return
 			}
 			for key, _ := range rl.visitors {
 				delete(rl.visitors, key)
@@ -98,7 +98,6 @@ func (rl *RateLimiter) cleanup() {
 				}
 			}
 			rl.lock.Unlock()
-			return
 		}
 	}
 }

@@ -40,7 +40,6 @@ type userInfoContext struct {
 	user *User
 }
 
-
 func (uic userInfoContext) Value(key interface{}) interface{} {
 	switch key {
 	case userCtxKey:

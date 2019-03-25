@@ -1,7 +1,14 @@
 package storage
 
 import (
+	"errors"
 	"github.com/thatique/kuade/kuade/auth"
+)
+
+// Storage Error
+var (
+	// return this error if the requested object does not exist
+	ErrNotFound = errors.New("Object doesn't exists")
 )
 
 // Storage Driver
