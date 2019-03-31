@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 // DefaultVersion - default policy version as per AWS S3 specification.
 const DefaultVersion = "2012-10-17"
 
 type Policy struct {
-	ID         ID          `json:"ID,omitempty" bson:"_id,omitempty"`
+	ID         ID          `json:"ID,omitempty"`
 	Version    string      `bson:"version"`
-	Statements []Statement `json:"Statement" bson:"statement"`
+	Statements []Statement `json:"Statement"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
@@ -116,44 +114,6 @@ func (policy Policy) GetBSON() (interface{}, error) {
 		Version:    policy.Version,
 		Statements: policy.Statements,
 	}, nil
-}
-
-func (policy *Policy) SetBSON(raw bson.Raw) error {
-	// subtype to avoid recursive call to UnmarshalJSON()
-	type subPolicy Policy
-	var sp subPolicy
-
-	if err := raw.Unmarshal(&sp); err != nil {
-		return err
-	}
-
-	p := Policy(sp)
-	if err := p.isValid(); err != nil {
-		return err
-	}
-
-	*policy = p
-
-	return nil
-}
-
-// UnmarshalJSON - decodes JSON data to Policy.
-func (policy *Policy) UnmarshalJSON(data []byte) error {
-	// subtype to avoid recursive call to UnmarshalJSON()
-	type subPolicy Policy
-	var sp subPolicy
-	if err := json.Unmarshal(data, &sp); err != nil {
-		return err
-	}
-
-	p := Policy(sp)
-	if err := p.isValid(); err != nil {
-		return err
-	}
-
-	*policy = p
-
-	return nil
 }
 
 // Validate - validates all statements are for given bucket or not.

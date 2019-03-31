@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/minio/minio-go/pkg/set"
 	"github.com/thatique/kuade/pkg/arn"
 )
@@ -66,19 +65,6 @@ func (resourceSet ResourceSet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(resources)
 }
 
-func (resourceSet ResourceSet) GetBSON() (interface{}, error) {
-	if len(resourceSet) == 0 {
-		return nil, fmt.Errorf("empty resource set")
-	}
-
-	resources := []arn.ARN{}
-	for resource := range resourceSet {
-		resources = append(resources, resource)
-	}
-
-	return resources, nil
-}
-
 // Match - matches object name with anyone of resource pattern in resource set.
 func (resourceSet ResourceSet) Match(resource string, conditionValues map[string][]string) bool {
 	for r := range resourceSet {
@@ -104,29 +90,6 @@ func (resourceSet ResourceSet) String() string {
 func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
 	if err := json.Unmarshal(data, &sset); err != nil {
-		return err
-	}
-
-	*resourceSet = make(ResourceSet)
-	for _, s := range sset.ToSlice() {
-		resource, err := arn.ParseARN(s)
-		if err != nil {
-			return err
-		}
-
-		if _, found := (*resourceSet)[resource]; found {
-			return fmt.Errorf("duplicate resource '%v' found", s)
-		}
-
-		resourceSet.Add(resource)
-	}
-
-	return nil
-}
-
-func (resourceSet *ResourceSet) SetBSON(raw bson.Raw) error {
-	var sset set.StringSet
-	if err := raw.Unmarshal(&sset); err != nil {
 		return err
 	}
 

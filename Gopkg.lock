@@ -18,7 +18,7 @@
   version = "v0.4.1"
 
 [[projects]]
-  digest = "1:9c410dafb5e44ddd1c11ebf4e4d981f945beadab11522978d8dca77b0e9dc09b"
+  digest = "1:0e3ee0c357dba5073fa9ac183b3380fc3c500e8eca5d3b951b00a6bb8415664e"
   name = "github.com/bugsnag/bugsnag-go"
   packages = [
     ".",
@@ -28,8 +28,8 @@
     "sessions",
   ]
   pruneopts = "UT"
-  revision = "939b556eb50a4ea47db60978c5662e1763e0f2f7"
-  version = "v1.4.1"
+  revision = "d5b63da7e1f93d83e3980e5ab2bf33179bad7b2a"
+  version = "v1.5.0"
 
 [[projects]]
   digest = "1:3049c43c6d1cfaa347acd27d6342187f8f38d9f416bbba7b02b43f82848302d2"
@@ -59,18 +59,12 @@
   revision = "d0e65e56babe3f687ff94c1d764ca0e6aa7723ee"
 
 [[projects]]
-  branch = "master"
-  digest = "1:78102ee4d536347316bc42e818340cc50902e45dbd7fdd524c5a1fc0cb07b588"
-  name = "github.com/globalsign/mgo"
-  packages = [
-    ".",
-    "bson",
-    "internal/json",
-    "internal/sasl",
-    "internal/scram",
-  ]
+  digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
+  name = "github.com/go-stack/stack"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
+  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
+  version = "v1.8.0"
 
 [[projects]]
   digest = "1:bed9d72d596f94e65fff37f4d6c01398074a6bb1c3f3ceff963516bd01db6ff5"
@@ -87,6 +81,14 @@
   pruneopts = "UT"
   revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
   version = "v1.3.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e4f5819333ac698d294fe04dbf640f84719658d5c7ce195b10060cc37292ce79"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
 
 [[projects]]
   digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
@@ -148,6 +150,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:67474f760e9ac3799f740db2c489e6423a4cde45520673ec123ac831ad849cb8"
+  name = "github.com/hashicorp/golang-lru"
+  packages = ["simplelru"]
+  pruneopts = "UT"
+  revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
+  version = "v0.5.1"
+
+[[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
@@ -193,7 +203,7 @@
   name = "github.com/minio/minio"
   packages = ["pkg/wildcard"]
   pruneopts = "UT"
-  revision = "22b4fe0a51bc58a63a11b3d5311b17bb5909f70c"
+  revision = "619611933a6c5d634a08eac8d06e344ab46452c6"
 
 [[projects]]
   digest = "1:90bd837cc278cfe1d698a0a25b585f920b2f7fed395c95ce9bf8ce643ca9d945"
@@ -203,8 +213,8 @@
     "pkg/set",
   ]
   pruneopts = "UT"
-  revision = "5df22878d3cdee48fbb086449268b1a465147c7d"
-  version = "v6.0.20"
+  revision = "a937bac96010803c5460f117490b21f96151c796"
+  version = "v6.0.21"
 
 [[projects]]
   digest = "1:be88a46cd36136d9a0fbe8f42dffc269a62544e3a12ff3b047b4704f9b349b42"
@@ -286,15 +296,91 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0c75a1e88c2b1e0361102c133f2690fd1fd5ab5da829f60a9c2dd20b9c224c71"
+  digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
+  name = "github.com/xdg/scram"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7eeb5667e42c09cb51bf7b7c28aea8c56767da90"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f5c1d04bc09c644c592b45b9f0bad4030521b1a7d11c7dadbb272d9439fa6e8e"
+  name = "github.com/xdg/stringprep"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "73f8eece6fdcd902c185bf651de50f3828bed5ed"
+
+[[projects]]
+  digest = "1:21f9cb6f1337c4776ed1d2d7b7ed6ffba3269ca12274c065364a5c0edee1f28b"
+  name = "go.mongodb.org/mongo-driver"
+  packages = [
+    "bson",
+    "bson/bsoncodec",
+    "bson/bsonrw",
+    "bson/bsontype",
+    "bson/primitive",
+    "event",
+    "internal",
+    "mongo",
+    "mongo/options",
+    "mongo/readconcern",
+    "mongo/readpref",
+    "mongo/writeconcern",
+    "tag",
+    "version",
+    "x/bsonx",
+    "x/bsonx/bsoncore",
+    "x/mongo/driver",
+    "x/mongo/driver/auth",
+    "x/mongo/driver/auth/internal/gssapi",
+    "x/mongo/driver/session",
+    "x/mongo/driver/topology",
+    "x/mongo/driver/uuid",
+    "x/network/address",
+    "x/network/command",
+    "x/network/compressor",
+    "x/network/connection",
+    "x/network/connstring",
+    "x/network/description",
+    "x/network/result",
+    "x/network/wiremessage",
+  ]
+  pruneopts = "UT"
+  revision = "1c3b9b9a41eecdf056560e07b68e6407b8d598c3"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:8abdd6af5d3880ba630f244ca3575fc2ae52a98d95c89f5e61ebb6dc9935bb7f"
+  name = "go.opencensus.io"
+  packages = [
+    ".",
+    "exemplar",
+    "internal",
+    "internal/tagencoding",
+    "stats",
+    "stats/internal",
+    "stats/view",
+    "tag",
+    "trace",
+    "trace/internal",
+    "trace/tracestate",
+  ]
+  pruneopts = "UT"
+  revision = "3b8e2721f2c3c01fa1bf4a2e455874e7b8319cd7"
+  version = "v0.19.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3f4267ef48c80f89cfd1e5b7f104c184a646e51e0b51a030d62184c830da5c4d"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
     "blowfish",
+    "pbkdf2",
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "b7391e95e576cacdcdd422573063bc057239113d"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
@@ -305,7 +391,7 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "addf6b3196f61cd44ce5a76657913698c73479d0"
+  revision = "74de082e2cca95839e88aa0aeee5aadf6ce7710f"
 
 [[projects]]
   branch = "master"
@@ -320,17 +406,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6b3e6ddcebac95be1d690dbd53b5aa2e520715becb7e521bb526ccf3b4c53c15"
+  digest = "1:75515eedc0dc2cb0b40372008b616fa2841d831c63eedd403285ff286c593295"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  pruneopts = "UT"
+  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f6321364014431568a59b49b449d6ae60c017f3afa3f4ab787a5636853b16b1e"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
+  revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
 
 [[projects]]
-  digest = "1:8eae63fdad880f0a261f473523e0f66b9be0361360d9d42c7b499227070ff5af"
+  digest = "1:ba375c6fad97a3349c94aac66ce905e8a291abf2fd958312606cbb065b46b4a6"
   name = "golang.org/x/text"
   packages = [
     "encoding",
@@ -341,8 +435,11 @@
     "encoding/simplifiedchinese",
     "encoding/traditionalchinese",
     "internal/gen",
+    "internal/triegen",
+    "internal/ucd",
     "transform",
     "unicode/cldr",
+    "unicode/norm",
   ]
   pruneopts = "UT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
@@ -355,6 +452,17 @@
   packages = ["rate"]
   pruneopts = "UT"
   revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
+
+[[projects]]
+  branch = "master"
+  digest = "1:363686890941480b8d1a0421b9e538cf55feaf9c7967bf4c809150b36138fe1c"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "d61658bd2e18010be0e21349cc92b1b706e35146"
 
 [[projects]]
   digest = "1:6eb6e3b6d9fffb62958cf7f7d88dbbe1dd6839436b0802e194c590667a40412a"
@@ -396,8 +504,6 @@
     "github.com/bshuster-repo/logrus-logstash-hook",
     "github.com/bugsnag/bugsnag-go",
     "github.com/emersion/go-message",
-    "github.com/globalsign/mgo",
-    "github.com/globalsign/mgo/bson",
     "github.com/gomodule/redigo/redis",
     "github.com/google/btree",
     "github.com/gorilla/csrf",
@@ -413,9 +519,19 @@
     "github.com/syaiful6/sersan",
     "github.com/syaiful6/sersan/redis",
     "github.com/syaiful6/thatique/uuid",
+    "go.mongodb.org/mongo-driver/bson",
+    "go.mongodb.org/mongo-driver/bson/primitive",
+    "go.mongodb.org/mongo-driver/mongo",
+    "go.mongodb.org/mongo-driver/mongo/options",
+    "go.mongodb.org/mongo-driver/mongo/readpref",
+    "go.opencensus.io/stats",
+    "go.opencensus.io/stats/view",
+    "go.opencensus.io/tag",
+    "go.opencensus.io/trace",
     "golang.org/x/crypto/bcrypt",
     "golang.org/x/oauth2",
     "golang.org/x/time/rate",
+    "golang.org/x/xerrors",
     "gopkg.in/check.v1",
     "gopkg.in/yaml.v2",
   ]

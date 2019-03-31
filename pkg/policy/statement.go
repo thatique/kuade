@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/thatique/kuade/pkg/policy/condition"
 )
 
@@ -80,48 +79,6 @@ func (statement Statement) MarshalJSON() ([]byte, error) {
 	type subStatement Statement
 	ss := subStatement(statement)
 	return json.Marshal(ss)
-}
-
-// MarshalJSON - encodes JSON data to Statement.
-func (statement Statement) GetBSON() (interface{}, error) {
-	if err := statement.isValid(); err != nil {
-		return nil, err
-	}
-
-	return struct {
-		SID        ID                  `json:"Sid,omitempty" bson:"SID,omitempty"`
-		Effect     Effect              `json:"Effect" bson:"effect"`
-		Principal  Principal           `json:"Principal" bson:"principal"`
-		Actions    ActionSet           `json:"Action" bson:"action"`
-		Resources  ResourceSet         `json:"Resource" bson:"resource"`
-		Conditions condition.Functions `json:"Condition,omitempty" bson:"condition,omitempty"`
-	}{
-		SID:        statement.SID,
-		Effect:     statement.Effect,
-		Principal:  statement.Principal,
-		Actions:    statement.Actions,
-		Resources:  statement.Resources,
-		Conditions: statement.Conditions,
-	}, nil
-}
-
-func (statement *Statement) SetBSON(raw bson.Raw) error {
-	// subtype to avoid recursive call to UnmarshalJSON()
-	type subStatement Statement
-	var ss subStatement
-
-	if err := raw.Unmarshal(&ss); err != nil {
-		return err
-	}
-
-	s := Statement(ss)
-	if err := s.isValid(); err != nil {
-		return err
-	}
-
-	*statement = s
-
-	return nil
 }
 
 // UnmarshalJSON - decodes JSON data to Statement.

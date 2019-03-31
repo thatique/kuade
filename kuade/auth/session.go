@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/globalsign/mgo/bson"
+	bson "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/syaiful6/sersan"
 )
 
@@ -146,11 +146,12 @@ func (sess *Session) loadUserFromSession(r *http.Request) (*User, error) {
 		return nil, InvalidUserSessionId
 	}
 
-	if !bson.IsObjectIdHex(uid) {
-		return nil, InvalidUserSessionId
+	objectid, err := bson.ObjectIDFromHex(uid)
+	if err != nil {
+		return nil, err
 	}
 
-	user, err := sess.users.FindById(r.Context(), bson.ObjectIdHex(uid))
+	user, err := sess.users.FindById(r.Context(), objectid)
 	if err != nil {
 		return nil, err
 	}

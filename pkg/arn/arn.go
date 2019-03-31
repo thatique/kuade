@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/minio/minio/pkg/wildcard"
 	"github.com/thatique/kuade/pkg/policy/condition"
 )
@@ -64,37 +63,12 @@ func (arn ARN) Match(resource string, conditionValues map[string][]string) bool 
 	return wildcard.Match(pattern, resource)
 }
 
-func (arn ARN) GetBSON() (interface{}, error) {
+func (arn ARN) MarshalJSON() ([]byte, error) {
 	if !arn.IsValid() {
 		return nil, fmt.Errorf("invalid ARN: %s", arn.String())
 	}
 
-	return arn.String(), nil
-}
-
-func (arn ARN) MarshalJSON() ([]byte, error) {
-	s, err := arn.GetBSON()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(s)
-}
-
-func (arn *ARN) SetBSON(raw bson.Raw) error {
-	var s string
-	if err := raw.Unmarshal(&s); err != nil {
-		return err
-	}
-
-	parsedARN, err := ParseARN(s)
-	if err != nil {
-		return err
-	}
-
-	*arn = parsedARN
-
-	return nil
+	return json.Marshal(arn.String())
 }
 
 func (arn *ARN) UnmarshalJSON(data []byte) error {

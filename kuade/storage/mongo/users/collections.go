@@ -3,8 +3,10 @@ package users
 import (
 	"time"
 
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
 	"github.com/thatique/kuade/pkg/emailparser"
@@ -38,7 +40,7 @@ type userProvider struct {
 }
 
 type userMgo struct {
-	Id          bson.ObjectId   `bson:"_id,omitempty"`
+	Id          bsonp.ObjectID  `bson:"_id,omitempty"`
 	Slug        string          `bson:"slug"`
 	Profile     dbProfile       `bson:"profile,omitempty"`
 	Email       string          `bson:"email"`
@@ -53,11 +55,20 @@ func (user *userMgo) Col() string {
 	return "users"
 }
 
-func (user *userMgo) Indexes() []mgo.Index {
-	return []mgo.Index{
-		mgo.Index{Key: []string{"email"}, Unique: true},
-		mgo.Index{Key: []string{"slug"}, Unique: true},
-		mgo.Index{Key: []string{"identities.name", "identities.key"}, Unique: true, Sparse: true},
+func (user *userMgo) Indexes() []mongo.IndexModel {
+	return []mongo.IndexModel{
+		mongo.IndexModel{
+			Keys: bson.D{{"email", "1"}},
+			Options: (&options.IndexOptions{}).SetUnique(true),
+		},
+		mongo.IndexModel{
+			Keys: bson.D{{"slug", "1"}},
+			Options: (&options.IndexOptions{}).SetUnique(true),
+		},
+		mongo.IndexModel{
+			Keys: bson.D{{"identities.name", 1}, {"identities.key", 1}},
+			Options: (&options.IndexOptions{}).SetUnique(true).SetSparse(true),
+		},
 	}
 }
 
@@ -77,7 +88,7 @@ func (u *userMgo) SlugQuery(slug string) bson.M {
 	return bson.M{"slug": slug}
 }
 
-func (u *userMgo) Presave(conn *db.Conn) {
+func (u *userMgo) Presave(conn *db.Client) {
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now().UTC()
 	}

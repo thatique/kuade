@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 const (
@@ -121,30 +119,6 @@ func (k Key) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(string(k))
-}
-
-func (k Key) GetBSON() (interface{}, error) {
-	if !k.IsValid() {
-		return nil, fmt.Errorf("invalid condition keu %v", k)
-	}
-
-	return string(k), nil
-}
-
-func (k *Key) SetBSON(raw bson.Raw) error {
-	var s string
-	if err := raw.Unmarshal(&s); err != nil {
-		return err
-	}
-
-	parsedKey, err := parseKey(s)
-	if err != nil {
-		return err
-	}
-
-	*k = parsedKey
-
-	return nil
 }
 
 func (k *Key) UnmarshalJSON(data []byte) error {

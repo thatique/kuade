@@ -3,8 +3,6 @@ package condition
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 type name string
@@ -60,29 +58,6 @@ func (n name) MarshalJSON() ([]byte, error) {
 func (n *name) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	parsedName, err := parseName(s)
-	if err != nil {
-		return err
-	}
-
-	*n = parsedName
-	return nil
-}
-
-func (n name) GetBSON() (interface{}, error) {
-	if !n.IsValid() {
-		return nil, fmt.Errorf("invalid condition name '%v'", n)
-	}
-
-	return string(n), nil
-}
-
-func (n *name) SetBSON(raw bson.Raw) error {
-	var s string
-	if err := raw.Unmarshal(&s); err != nil {
 		return err
 	}
 

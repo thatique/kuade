@@ -4,27 +4,28 @@ import (
 	"context"
 	"errors"
 
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
-	"github.com/thatique/kuade/kuade/api/types"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
 )
 
 type MgoUserStore struct {
-	c *db.Conn
+	c *db.Client
 }
 
-func New(conn *db.Conn) *MgoUserStore {
+func New(conn *db.Client) *MgoUserStore {
 	return &MgoUserStore{c: conn}
 }
 
-func (conn *MgoUserStore) FindById(ctx context.Context, id bson.ObjectId) (user *auth.User, err error) {
+func (conn *MgoUserStore) FindById(ctx context.Context, id bsonp.ObjectID) (user *auth.User, err error) {
 	var dbuser *userMgo
-	err = conn.c.C(dbuser).FindId(id).One(&dbuser)
+	err = conn.c.C(dbuser).FindOne(ctx, bson.M{"_id": id}).Decode(&dbuser)
 	if err != nil {
-		if err == mgo.ErrNotFound {
+		if err == mongo.ErrNoDocuments {
 			err = storage.ErrNotFound
 		}
 		return
@@ -35,9 +36,9 @@ func (conn *MgoUserStore) FindById(ctx context.Context, id bson.ObjectId) (user 
 
 func (conn *MgoUserStore) FindByEmail(ctx context.Context, email string) (user *auth.User, err error) {
 	var dbuser *userMgo
-	err = conn.c.Find(dbuser, bson.M{"email": email}).One(&dbuser)
+	err = conn.c.C(dbuser).FindOne(ctx, bson.M{"email": email}).Decode(&dbuser)
 	if err != nil {
-		if err == mgo.ErrNotFound {
+		if err == mongo.ErrNoDocuments {
 			err = storage.ErrNotFound
 		}
 		return
@@ -48,9 +49,9 @@ func (conn *MgoUserStore) FindByEmail(ctx context.Context, email string) (user *
 
 func (conn *MgoUserStore) FindBySlug(ctx context.Context, slug string) (user *auth.User, err error) {
 	var dbuser *userMgo
-	err = conn.c.Find(dbuser, bson.M{"slug": slug}).One(&dbuser)
+	err = conn.c.C(dbuser).FindOne(ctx, bson.M{"slug": slug}).Decode(&dbuser)
 	if err != nil {
-		if err == mgo.ErrNotFound {
+		if err == mongo.ErrNoDocuments {
 			err = storage.ErrNotFound
 		}
 		return
@@ -75,52 +76,29 @@ func (conn *MgoUserStore) FindOrCreateUserForProvider(ctx context.Context, data 
 		userProvider{Name: provider.Name, Key: provider.Key},
 	}
 
-	info, err := conn.c.C(dbuser).Upsert(userQuery, bson.M{"$setOnInsert": dbuser})
+	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.Before)
+
+	var dbuser2 *userMgo
+	err = conn.c.C(dbuser).FindOneAndUpdate(ctx, userQuery, bson.M{"$setOnInsert": dbuser}, opts).Decode(&dbuser2)
 	if err != nil {
-		return
+		if err == mongo.ErrNoDocuments {
+			dbuser.Id = dbuser2.Id
+			return true, toAuthModel(dbuser), nil
+		}
+		return false, nil, err
 	}
 
-	if info.UpsertedId != nil {
-		newuser = true
-		user, err = conn.FindById(context.Background(), info.UpsertedId.(bson.ObjectId))
-		if err != nil {
-			return
-		}
-	} else {
-		newuser = false
-		var dbuser2 *userMgo
-		err = conn.c.Find(dbuser, userQuery).One(&dbuser2)
-		if err != nil {
-			return
-		}
-		user = toAuthModel(dbuser2)
-	}
-
-	return
+	return false, toAuthModel(dbuser), nil
 }
 
-func (conn *MgoUserStore) List(ctx context.Context, pagination types.PaginationArgs) (users []*auth.User, err error) {
-	var dbuser *userMgo
-	iter := conn.c.Latest(dbuser, nil).Skip(pagination.Offset).Limit(pagination.Limit).Iter()
-
-	for iter.Next(&dbuser) {
-		users = append(users, toAuthModel(dbuser))
-	}
-	if iter.Timeout() {
-		err = errors.New("storage mongo: iter timeout")
-		return
-	}
-	err = iter.Close()
-	return
-}
-
-func (conn *MgoUserStore) Create(ctx context.Context, user *auth.User) (id bson.ObjectId, err error) {
+func (conn *MgoUserStore) Create(ctx context.Context, user *auth.User) (id bsonp.ObjectID, err error) {
 	dbuser := fromAuthModel(user)
-	info, err := conn.c.Upsert(dbuser)
+	dbuser.Presave(conn.c)
+	info, err := conn.c.C(dbuser).InsertOne(ctx, dbuser)
 
-	id, ok := info.UpsertedId.(bson.ObjectId)
+	id, ok := info.InsertedID.(bsonp.ObjectID)
 	if !ok {
-		return bson.ObjectId(""), err
+		return bsonp.NilObjectID, err
 	}
 	return id, nil
 }
@@ -132,18 +110,19 @@ func (conn *MgoUserStore) Update(ctx context.Context, user *auth.User) (err erro
 	}
 
 	dbuser := fromAuthModel(user)
-	err = conn.c.C(dbuser).UpdateId(dbuser.Id, bson.M{"$set": dbuser})
+	dbuser.Presave(conn.c)
+	_, err = conn.c.C(dbuser).UpdateOne(ctx,  bson.M{"_id": user.Id}, bson.M{"$set": dbuser})
 	return
 }
 
-func (conn *MgoUserStore) UpdateCredentials(ctx context.Context, id bson.ObjectId, creds auth.Credentials) error {
+func (conn *MgoUserStore) UpdateCredentials(ctx context.Context, id bsonp.ObjectID, creds auth.Credentials) error {
 	var dbCreds = dbCredentials{
 		Enabled:    creds.Enabled,
 		Password:   creds.Password,
 		CreatedAt:  creds.CreatedAt,
 		LastSignin: creds.LastSignin,
 	}
-	err := conn.c.C(&userMgo{}).UpdateId(id, bson.M{"$set": bson.M{"credentials": dbCreds}})
+	_, err := conn.c.C(&userMgo{}).UpdateOne(ctx, bson.M{"_id": id}, bson.M{"credentials": dbCreds})
 	return err
 }
 
@@ -153,11 +132,11 @@ func (conn *MgoUserStore) Delete(ctx context.Context, user *auth.User) (err erro
 		return
 	}
 
-	err = conn.c.C(&userMgo{}).RemoveId(user.Id)
+	_, err = conn.c.C(&userMgo{}).DeleteOne(ctx, bson.M{"_id": user.Id})
 	return
 }
 
-func (conn *MgoUserStore) Count(ctx context.Context) (count int, err error) {
-	count, err = conn.c.Find(&userMgo{}, nil).Count()
+func (conn *MgoUserStore) Count(ctx context.Context) (count int64, err error) {
+	count, err = conn.c.C(&userMgo{}).CountDocuments(ctx, bson.M{})
 	return
 }

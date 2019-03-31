@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 // Splits an incoming path into bucket and object components.
@@ -137,41 +135,6 @@ func (v *Value) UnmarshalJSON(data []byte) error {
 	}
 
 	return fmt.Errorf("unknown json data '%v'", data)
-}
-
-func (v Value) GetBSON() (interface{}, error) {
-	switch v.t {
-	case reflect.String:
-		return v.s, nil
-	case reflect.Int:
-		return v.i, nil
-	case reflect.Bool:
-		return v.b, nil
-	}
-
-	return nil, fmt.Errorf("unknown value kind %v", v.t)
-}
-
-func (v *Value) SetBSON(raw bson.Raw) error {
-	var b bool
-	if err := raw.Unmarshal(&b); err == nil {
-		v.StoreBool(b)
-		return nil
-	}
-
-	var i int
-	if err := raw.Unmarshal(&i); err == nil {
-		v.StoreInt(i)
-		return nil
-	}
-
-	var s string
-	if err := raw.Unmarshal(&s); err == nil {
-		v.StoreString(s)
-		return nil
-	}
-
-	return fmt.Errorf("unknown bson data '%v'", raw)
 }
 
 // NewBoolValue - returns new bool value.

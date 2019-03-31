@@ -175,7 +175,10 @@ func copyConfig(config Configuration) *Configuration {
 
 	configCopy.Queue = config.Queue
 	configCopy.Redis = config.Redis
-	configCopy.Storage = config.Storage
+	configCopy.Storage =  Storage{config.Storage.Type(): Parameters{}}
+	for k, v := range config.Storage.Parameters() {
+		configCopy.Storage.setParameter(k, v)
+	}
 
 	return configCopy
 }

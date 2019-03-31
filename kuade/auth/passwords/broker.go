@@ -9,7 +9,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/globalsign/mgo/bson"
+	bson "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/auth/passwords/notifications"
 	"github.com/thatique/kuade/kuade/auth/passwords/tokens"
@@ -79,7 +79,7 @@ func (b *Broker) SendResetLink(ctx context.Context, ip string, email string) err
 		return err
 	}
 
-	uid := base64.RawURLEncoding.EncodeToString([]byte(user.Id))
+	uid := base64.RawURLEncoding.EncodeToString(user.Id[:])
 	link := fmt.Sprintf("%s/%s/%s", b.ResetURL, uid, token)
 
 	r, w := io.Pipe()
@@ -155,12 +155,15 @@ func (b *Broker) ValidateReset(ctx context.Context, uid, token string) (req *Res
 	return
 }
 
-func (b *Broker) validateUid(uid string) (bson.ObjectId, bool) {
+func (b *Broker) validateUid(uid string) (bson.ObjectID, bool) {
 	bs, err := base64.RawURLEncoding.DecodeString(uid)
 	if err != nil {
-		return bson.ObjectId(""), false
+		return bson.NilObjectID, false
 	}
-
-	objectid := bson.ObjectId(bs[:])
-	return objectid, objectid.Valid()
+	if len(bs) != 12 {
+		return bson.NilObjectID, false
+	}
+	var oid [12]byte
+	copy(oid[:], bs[:])
+	return oid, true
 }

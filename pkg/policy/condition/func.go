@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 // Function - condition function interface.
@@ -54,15 +52,6 @@ func (fns Functions) Keys() KeySet {
 
 // MarshalJSON - encodes Functions to  JSON data.
 func (fns Functions) MarshalJSON() ([]byte, error) {
-	nm, err := fns.GetBSON()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(nm)
-}
-
-func (fns Functions) GetBSON() (interface{}, error) {
 	nm := make(map[name]map[Key]ValueSet)
 
 	for _, fn := range fns {
@@ -75,7 +64,7 @@ func (fns Functions) GetBSON() (interface{}, error) {
 		}
 	}
 
-	return nm, nil
+	return json.Marshal(nm)
 }
 
 func (fns Functions) String() string {
@@ -115,48 +104,6 @@ func (functions *Functions) UnmarshalJSON(data []byte) error {
 	// Due to this issue, name and Key types cannot be used as map keys below.
 	nm := make(map[string]map[string]ValueSet)
 	if err := json.Unmarshal(data, &nm); err != nil {
-		return err
-	}
-
-	if len(nm) == 0 {
-		return fmt.Errorf("condition must not be empty")
-	}
-
-	funcs := []Function{}
-	for nameString, args := range nm {
-		n, err := parseName(nameString)
-		if err != nil {
-			return err
-		}
-
-		for keyString, values := range args {
-			key, err := parseKey(keyString)
-			if err != nil {
-				return err
-			}
-
-			vfn, ok := conditionFuncMap[n]
-			if !ok {
-				return fmt.Errorf("condition %v is not handled", n)
-			}
-
-			f, err := vfn(key, values)
-			if err != nil {
-				return err
-			}
-
-			funcs = append(funcs, f)
-		}
-	}
-
-	*functions = funcs
-
-	return nil
-}
-
-func (functions *Functions) SetBSON(raw bson.Raw) error {
-	nm := make(map[string]map[string]ValueSet)
-	if err := raw.Unmarshal(&nm); err != nil {
 		return err
 	}
 

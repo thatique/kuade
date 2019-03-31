@@ -1,7 +1,8 @@
 package mongo
 
 import (
-	"github.com/globalsign/mgo"
+	"context"
+
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage"
 	"github.com/thatique/kuade/kuade/storage/factory"
@@ -14,7 +15,7 @@ type MongoParam struct {
 }
 
 type Driver struct {
-	c *db.Conn
+	c *db.Client
 }
 
 func init() {
@@ -33,15 +34,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 }
 
 func New(param *MongoParam) (*Driver, error) {
-	info, err := mgo.ParseURL(param.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := db.DialWithInfo(info)
-	if err != nil {
-		return nil, err
-	}
+	c, err := db.Connect(context.Background(), param.URL)
 
 	return &Driver{c: conn}, nil
 }

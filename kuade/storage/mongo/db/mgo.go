@@ -3,10 +3,13 @@ package db
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
 	"github.com/thatique/kuade/pkg/text"
+	"github.com/thatique/kuade/pkg/mango"
 )
 
 var models = []Model{}
@@ -14,7 +17,7 @@ var models = []Model{}
 // A model represent mongo collection
 type Model interface {
 	Col() string
-	Indexes() []mgo.Index
+	Indexes() []mongo.IndexModel
 }
 
 type Slugable interface {
@@ -30,36 +33,45 @@ type OrderedModel interface {
 type Updatable interface {
 	Model
 	Unique() bson.M
-	Presave(conn *Conn)
+	Presave(client *Client)
 }
 
-type Conn struct {
-	Session *mgo.Session
-	DB      *mgo.Database // default db
+type Client struct {
+	*mango.Client
+	DB      *mango.Database // default db
 }
 
 func Register(m Model) {
 	models = append(models, m)
 }
 
-func registerIndexes(conn *Conn, m Model) error {
-	collection := conn.DB.C(m.Col())
-	indexes := m.Indexes()
-	for _, index := range indexes {
-		err := collection.EnsureIndex(index)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func registerIndexes(client *Client, m Model) error {
+	collection := client.DB.Collection(m.Col())
+	ixView     := collection.Indexes()
+	// then register this index
+	_, err := ixView.CreateMany(context.Background(), m.Indexes())
+	return err
 }
 
-func DialWithInfo(info *mgo.DialInfo) (*Conn, error) {
-	session, err := mgo.DialWithInfo(info)
+func Connect(ctx context.Context, urlstr string) (*Client, error) {
+	u, err := url.Parse(urlstr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid url: %s. fail with error: %v", urlstr, err)
+	}
+	db := strings.Trim(u.Path, "/")
 
-	conn := &Conn{
-		Session: session,
-		DB:      session.DB(info.Database),
+	mclient, err := mango.NewClient(urlstr)
+	if err != nil {
+		return nil, err
+	}
+	err = mclient.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	conn := &Client{
+		Client: mclient,
+		DB:      mclient.Database(db),
 	}
 
 	for _, model := range models {
@@ -69,86 +81,34 @@ func DialWithInfo(info *mgo.DialInfo) (*Conn, error) {
 	return conn, err
 }
 
-func (conn *Conn) Copy() *Conn {
-	sess := conn.Session.Copy()
-	return &Conn{
-		Session: sess,
-		DB:      sess.DB(conn.DB.Name),
-	}
-}
-
-func (conn *Conn) Close() {
-	conn.Session.Close()
-}
-
 //
-func (conn *Conn) C(m Model) *mgo.Collection {
-	return conn.DB.C(m.Col())
+func (c *Client) C(m Model) *mango.Collection {
+	return c.DB.Collection(m.Col())
 }
 
-func (conn *Conn) Find(m Model, query interface{}) *mgo.Query {
-	return conn.C(m).Find(query)
-}
-
-func (conn *Conn) Latest(ord OrderedModel, query interface{}) *mgo.Query {
-	return conn.Find(ord.(Model), query).Sort(ord.SortBy())
-}
-
-func (conn *Conn) Exists(u Updatable) bool {
-	var data interface{}
-	err := conn.C(u.(Model)).Find(u.Unique()).One(&data)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
-func (conn *Conn) Upsert(u Updatable) (info *mgo.ChangeInfo, err error) {
-	u.Presave(conn)
-	return conn.C(u.(Model)).Upsert(u.Unique(), u)
-}
-
-func (conn *Conn) GenerateSlug(m Slugable, base string) (string, error) {
+func (c *Client) GenerateSlug(m Slugable, base string) (string, error) {
 	var (
 		slug       = text.Slugify(base)
-		collection = conn.DB.C(m.Col())
+		collection = c.C(m)
 		maxretries = 20
 		retries    int
-		count      int
 		err        error
+		ret        bson.M
 	)
 	slugToTry := slug
 	for {
-		count, err = collection.Find(m.SlugQuery(slugToTry)).Count()
+		err = collection.FindOne(context.Background(), m.SlugQuery(slugToTry)).Decode(&ret)
 		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return slugToTry, nil
+			}
+			// non expected error, return
 			return "", err
-		}
-		if count == 0 {
-			return slugToTry, nil
 		}
 		retries += 1
 		if retries > maxretries {
 			return "", fmt.Errorf("generateslug: maximum retries reached. max: %d", maxretries)
 		}
 		slugToTry = fmt.Sprintf("%s-%d", slug, retries)
-	}
-}
-
-//
-func (conn *Conn) WithContext(ctx context.Context, f func(*Conn) error) error {
-	sess := conn.Copy()
-	defer sess.Close()
-
-	c := make(chan error, 1)
-	go func() {
-		c <- f(sess)
-	}()
-
-	select {
-	case <-ctx.Done():
-		<-c // Wait for f to return
-		return ctx.Err()
-	case err := <-c:
-		return err
 	}
 }

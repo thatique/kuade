@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/minio/minio-go/pkg/set"
 	"github.com/minio/minio/pkg/wildcard"
 )
@@ -34,19 +33,6 @@ func (p Principal) MarshalJSON() ([]byte, error) {
 	type subPrincipal Principal
 	sp := subPrincipal(p)
 	return json.Marshal(sp)
-}
-
-//
-func (p Principal) GetBSON() (interface{}, error) {
-	if !p.IsValid() {
-		return nil, fmt.Errorf("invalid principal %v", p)
-	}
-
-	return struct {
-		AWS set.StringSet
-	}{
-		AWS: p.AWS,
-	}, nil
 }
 
 // Match - matches given principal is wildcard matching with Principal.
@@ -81,27 +67,6 @@ func (p *Principal) UnmarshalJSON(data []byte) error {
 
 	*p = Principal(sp)
 
-	return nil
-}
-
-func (p *Principal) SetBSON(raw bson.Raw) error {
-	type subPrincipal Principal
-	var sp subPrincipal
-
-	if err := raw.Unmarshal(&sp); err != nil {
-		var s string
-		if err = raw.Unmarshal(&s); err != nil {
-			return err
-		}
-
-		if s != "*" {
-			return fmt.Errorf("invalid principal '%v'", s)
-		}
-
-		sp.AWS = set.CreateStringSet("*")
-	}
-
-	*p = Principal(sp)
 	return nil
 }
 

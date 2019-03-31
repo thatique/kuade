@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/globalsign/mgo/bson"
-	"github.com/thatique/kuade/kuade/api/types"
+	bson "go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -115,7 +114,7 @@ type Credentials struct {
 }
 
 type User struct {
-	Id          bson.ObjectId `xml:"Id" json:"id"`
+	Id          bson.ObjectID `xml:"Id" json:"id"`
 	Slug        string        `xml:"Slug" json:"slug"`
 	Profile     Profile       `xml:"Profile" json:"profile,omitempty"`
 	Email       string        `xml:"-" json:"-"`
@@ -132,7 +131,7 @@ type OAuthProvider struct {
 
 type UserStore interface {
 	// find a user by it's id
-	FindById(ctx context.Context, id bson.ObjectId) (*User, error)
+	FindById(ctx context.Context, id bson.ObjectID) (*User, error)
 
 	// find a user by it's email
 	FindByEmail(ctx context.Context, email string) (*User, error)
@@ -142,23 +141,20 @@ type UserStore interface {
 
 	FindOrCreateUserForProvider(ctx context.Context, userdata *User, provider OAuthProvider) (newuser bool, user *User, err error)
 
-	// list returns a list of users from the datastore.
-	List(ctx context.Context, pagination types.PaginationArgs) ([]*User, error)
-
 	// Create user
-	Create(ctx context.Context, user *User) (bson.ObjectId, error)
+	Create(ctx context.Context, user *User) (bson.ObjectID, error)
 
 	// Update persists an updated user to the datastore.
 	Update(context.Context, *User) error
 
 	// Update user credentials
-	UpdateCredentials(context.Context, bson.ObjectId, Credentials) error
+	UpdateCredentials(context.Context, bson.ObjectID, Credentials) error
 
 	// Delete deletes a user from the datastore.
 	Delete(context.Context, *User) error
 
 	// Count returns a count of active users.
-	Count(context.Context) (int, error)
+	Count(context.Context) (int64, error)
 }
 
 func (user *User) IsActive() bool {

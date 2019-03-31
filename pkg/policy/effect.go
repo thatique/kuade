@@ -3,8 +3,6 @@ package policy
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 type Effect string
@@ -43,30 +41,6 @@ func (effect Effect) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(string(effect))
-}
-
-func (effect Effect) GetBSON() (interface{}, error) {
-	if !effect.IsValid() {
-		return nil, fmt.Errorf("invalid effect keu %v", effect)
-	}
-
-	return string(effect), nil
-}
-
-func (effect *Effect) SetBSON(raw bson.Raw) error {
-	var s string
-	if err := raw.Unmarshal(&s); err != nil {
-		return err
-	}
-
-	e := Effect(s)
-	if !e.IsValid() {
-		return fmt.Errorf("invalid effect '%v'", s)
-	}
-
-	*effect = e
-
-	return nil
 }
 
 // UnmarshalJSON - decodes JSON data to Effect.
