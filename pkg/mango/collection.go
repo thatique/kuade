@@ -26,7 +26,7 @@ func (coll *Collection) Database() *Database {
 }
 
 func (coll *Collection) BulkWrite(ctx context.Context, models []mongo.WriteModel,
-		opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
+	opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.BulkWrite", modulestr))
 	defer span.end(ctx)
@@ -39,7 +39,7 @@ func (coll *Collection) BulkWrite(ctx context.Context, models []mongo.WriteModel
 }
 
 func (coll *Collection) InsertOne(ctx context.Context, doc interface{},
-		opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.InsertOne", modulestr))
 	defer span.end(ctx)
@@ -52,7 +52,7 @@ func (coll *Collection) InsertOne(ctx context.Context, doc interface{},
 }
 
 func (coll *Collection) InsertMany(ctx context.Context, doc []interface{},
-		opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+	opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.InsertMany", modulestr))
 	defer span.end(ctx)
@@ -65,7 +65,7 @@ func (coll *Collection) InsertMany(ctx context.Context, doc []interface{},
 }
 
 func (coll *Collection) DeleteOne(ctx context.Context, filter interface{},
-		opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.DeleteOne", modulestr))
 	defer span.end(ctx)
@@ -79,7 +79,7 @@ func (coll *Collection) DeleteOne(ctx context.Context, filter interface{},
 
 // DeleteMany deletes multiple documents from the collection.
 func (coll *Collection) DeleteMany(ctx context.Context, filter interface{},
-		opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.DeleteMany", modulestr))
 	defer span.end(ctx)
@@ -93,7 +93,7 @@ func (coll *Collection) DeleteMany(ctx context.Context, filter interface{},
 
 // UpdateOne updates a single document in the collection.
 func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, update interface{},
-		opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.UpdateOne", modulestr))
 	defer span.end(ctx)
@@ -107,7 +107,7 @@ func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updat
 
 // UpdateMany updates multiple documents in the collection.
 func (coll *Collection) UpdateMany(ctx context.Context, filter interface{}, update interface{},
-		opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.UpdateMany", modulestr))
 	defer span.end(ctx)
@@ -121,7 +121,7 @@ func (coll *Collection) UpdateMany(ctx context.Context, filter interface{}, upda
 
 // ReplaceOne replaces a single document in the collection.
 func (coll *Collection) ReplaceOne(ctx context.Context, filter interface{},
-		replacement interface{}, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
+	replacement interface{}, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.ReplaceOne", modulestr))
 	defer span.end(ctx)
@@ -137,7 +137,7 @@ func (coll *Collection) ReplaceOne(ctx context.Context, filter interface{},
 //
 // See https://docs.mongodb.com/manual/aggregation/.
 func (coll *Collection) Aggregate(ctx context.Context, pipeline interface{},
-		opts ...*options.AggregateOptions) (*mongo.Cursor, error) {
+	opts ...*options.AggregateOptions) (*mongo.Cursor, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.Aggregate", modulestr))
 	defer span.end(ctx)
@@ -151,7 +151,7 @@ func (coll *Collection) Aggregate(ctx context.Context, pipeline interface{},
 
 // CountDocuments gets the number of documents matching the filter.
 func (coll *Collection) CountDocuments(ctx context.Context, filter interface{},
-		opts ...*options.CountOptions) (int64, error) {
+	opts ...*options.CountOptions) (int64, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.CountDocuments", modulestr))
 	defer span.end(ctx)
@@ -165,7 +165,7 @@ func (coll *Collection) CountDocuments(ctx context.Context, filter interface{},
 
 // EstimatedDocumentCount gets an estimate of the count of documents in a collection using collection metadata.
 func (coll *Collection) EstimatedDocumentCount(ctx context.Context,
-		opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
+	opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.EstimatedDocumentCount", modulestr))
 	defer span.end(ctx)
@@ -180,7 +180,7 @@ func (coll *Collection) EstimatedDocumentCount(ctx context.Context,
 // Distinct finds the distinct values for a specified field across a single
 // collection.
 func (coll *Collection) Distinct(ctx context.Context, fieldName string, filter interface{},
-		opts ...*options.DistinctOptions) ([]interface{}, error) {
+	opts ...*options.DistinctOptions) ([]interface{}, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.Distinct", modulestr))
 	defer span.end(ctx)
@@ -194,7 +194,7 @@ func (coll *Collection) Distinct(ctx context.Context, fieldName string, filter i
 
 // Find finds the documents matching a model.
 func (coll *Collection) Find(ctx context.Context, filter interface{},
-		opts ...*options.FindOptions) (*mongo.Cursor, error) {
+	opts ...*options.FindOptions) (*mongo.Cursor, error) {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.Find", modulestr))
 	defer span.end(ctx)
@@ -208,7 +208,7 @@ func (coll *Collection) Find(ctx context.Context, filter interface{},
 
 // FindOne returns up to one document that matches the model.
 func (coll *Collection) FindOne(ctx context.Context, filter interface{},
-		opts ...*options.FindOneOptions) *mongo.SingleResult {
+	opts ...*options.FindOneOptions) *mongo.SingleResult {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.FindOne", modulestr))
 	defer span.end(ctx)
@@ -219,7 +219,7 @@ func (coll *Collection) FindOne(ctx context.Context, filter interface{},
 // FindOneAndDelete find a single document and deletes it, returning the
 // original in result.
 func (coll *Collection) FindOneAndDelete(ctx context.Context, filter interface{},
-		opts ...*options.FindOneAndDeleteOptions) *mongo.SingleResult {
+	opts ...*options.FindOneAndDeleteOptions) *mongo.SingleResult {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.FindOneAndDelete", modulestr))
 	defer span.end(ctx)
@@ -230,7 +230,7 @@ func (coll *Collection) FindOneAndDelete(ctx context.Context, filter interface{}
 // FindOneAndReplace finds a single document and replaces it, returning either
 // the original or the replaced document.
 func (coll *Collection) FindOneAndReplace(ctx context.Context, filter interface{},
-		replacement interface{}, opts ...*options.FindOneAndReplaceOptions) *mongo.SingleResult {
+	replacement interface{}, opts ...*options.FindOneAndReplaceOptions) *mongo.SingleResult {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.FindOneAndReplace", modulestr))
 	defer span.end(ctx)
@@ -241,7 +241,7 @@ func (coll *Collection) FindOneAndReplace(ctx context.Context, filter interface{
 // FindOneAndUpdate finds a single document and updates it, returning either
 // the original or the updated.
 func (coll *Collection) FindOneAndUpdate(ctx context.Context, filter interface{},
-		update interface{}, opts ...*options.FindOneAndUpdateOptions) *mongo.SingleResult {
+	update interface{}, opts ...*options.FindOneAndUpdateOptions) *mongo.SingleResult {
 
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Collection.FindOneAndUpdate", modulestr))
 	defer span.end(ctx)

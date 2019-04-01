@@ -9,11 +9,11 @@ import (
 	"text/template"
 	"time"
 
-	bson "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/auth/passwords/notifications"
 	"github.com/thatique/kuade/kuade/auth/passwords/tokens"
 	"github.com/thatique/kuade/pkg/emailparser"
+	bson "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var ErrInvalidEmail = errors.New("passwords: invalid email")

@@ -1,16 +1,52 @@
 package smtp
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"net"
 	"net/mail"
 	"net/smtp"
+	"net/url"
 	"strings"
 	"sync"
 
 	"github.com/emersion/go-message"
+	"github.com/thatique/kuade/pkg/kerr"
+	"github.com/thatique/kuade/pkg/mailer"
 )
+
+var (
+	ErrConnNotEstablished = errors.New("mailer.smtp: connection to smpt server not establish")
+)
+
+const Scheme = "smtp"
+
+func init() {
+	mailer.DefaultURLMux().RegisterTransport(Scheme, new(URLOpener))
+}
+
+// URLOpener opens Mailer URLs like
+// smtp://username:password@host:port
+type URLOpener struct{}
+
+func (uo *URLOpener) OpenTransportURL(ctx context.Context, u *url.URL) (*mailer.Transport, error) {
+	options := &Options{
+		Addr: u.Host,
+	}
+	if u.User != nil {
+		pswd, isset := u.User.Password()
+		if isset {
+			options.Password = pswd
+		}
+		options.Username = u.User.Username()
+	}
+	return NewTransport(options), nil
+}
+
+func NewTransport(options *Options) *mailer.Transport {
+	return mailer.NewTransport(newSMTPTransport(options))
+}
 
 type Options struct {
 	// The addr must include a port, as in "mail.example.com:smtp".
@@ -21,7 +57,7 @@ type Options struct {
 	Password string
 }
 
-type SMTPTransport struct {
+type smtpTransport struct {
 	locker sync.Mutex
 	conn   *smtp.Client
 	option *Options
@@ -29,16 +65,16 @@ type SMTPTransport struct {
 	serverName string
 }
 
-func NewSMTPTransport(option *Options) *SMTPTransport {
+func newSMTPTransport(option *Options) *smtpTransport {
 	host, _, _ := net.SplitHostPort(option.Addr)
 
-	return &SMTPTransport{
+	return &smtpTransport{
 		option:     option,
 		serverName: host,
 	}
 }
 
-func (t *SMTPTransport) Open() error {
+func (t *smtpTransport) Open(ctx context.Context) error {
 	t.locker.Lock()
 	defer t.locker.Unlock()
 
@@ -83,9 +119,9 @@ func (t *SMTPTransport) Open() error {
 			if err = c.Auth(auth); err != nil {
 				return err
 			}
+		} else {
+			return ErrAuthNotSupported
 		}
-
-		return errors.New("mailer.smptp: server doesn't support AUTH")
 	}
 
 	// connection establish, store it and return
@@ -94,7 +130,7 @@ func (t *SMTPTransport) Open() error {
 	return nil
 }
 
-func (t *SMTPTransport) Close() error {
+func (t *smtpTransport) Close(ctx context.Context) error {
 	t.locker.Lock()
 	defer t.locker.Unlock()
 
@@ -107,7 +143,7 @@ func (t *SMTPTransport) Close() error {
 	return err
 }
 
-func (t *SMTPTransport) SendMessages(messages []*message.Entity) (int, error) {
+func (t *smtpTransport) SendMessages(ctx context.Context, messages []*message.Entity) (int, error) {
 	if len(messages) == 0 {
 		return 0, nil
 	}
@@ -123,7 +159,7 @@ func (t *SMTPTransport) SendMessages(messages []*message.Entity) (int, error) {
 
 	// fail silently?
 	if t.conn == nil {
-		return numsent, errors.New("mailer.smtp: connection not opened.")
+		return numsent, ErrConnNotEstablished
 	}
 
 	for _, msg := range messages {
@@ -139,7 +175,7 @@ func (t *SMTPTransport) SendMessages(messages []*message.Entity) (int, error) {
 	return numsent, nil
 }
 
-func (t *SMTPTransport) sendMessage(msg *message.Entity) (bool, error) {
+func (t *smtpTransport) sendMessage(msg *message.Entity) (bool, error) {
 	var (
 		headerPrefix string
 		fromAddrStr  string
@@ -200,4 +236,19 @@ func (t *SMTPTransport) sendMessage(msg *message.Entity) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (t *smtpTransport) ErrorCode(err error) kerr.ErrorCode {
+	if err == nil {
+		return kerr.OK
+	}
+	if err == ErrTLSRequired || err == ErrInvalidHost || err == ErrAuthNotSupported {
+		return kerr.InvalidArgument
+	}
+
+	if err == ErrConnNotEstablished {
+		return kerr.FailedPrecondition
+	}
+
+	return kerr.Unknown
 }

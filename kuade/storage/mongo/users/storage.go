@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/bson"
-	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
+	"go.mongodb.org/mongo-driver/bson"
+	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MgoUserStore struct {
@@ -111,7 +111,7 @@ func (conn *MgoUserStore) Update(ctx context.Context, user *auth.User) (err erro
 
 	dbuser := fromAuthModel(user)
 	dbuser.Presave(conn.c)
-	_, err = conn.c.C(dbuser).UpdateOne(ctx,  bson.M{"_id": user.Id}, bson.M{"$set": dbuser})
+	_, err = conn.c.C(dbuser).UpdateOne(ctx, bson.M{"_id": user.Id}, bson.M{"$set": dbuser})
 	return
 }
 

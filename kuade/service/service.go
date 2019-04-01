@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -9,7 +10,7 @@ import (
 	"github.com/thatique/kuade/kuade/storage"
 	"github.com/thatique/kuade/kuade/storage/factory"
 	"github.com/thatique/kuade/pkg/mailer"
-	smtptransport "github.com/thatique/kuade/pkg/mailer/smtp"
+	_ "github.com/thatique/kuade/pkg/mailer/smtp"
 	"github.com/thatique/kuade/pkg/queue"
 )
 
@@ -17,7 +18,7 @@ type Service struct {
 	Storage storage.Driver
 	Queue   *queue.Queue
 	Redis   *redis.Pool
-	Mailer  mailer.Transport
+	Mailer  *mailer.Transport
 	Config  *configuration.Configuration
 }
 
@@ -114,20 +115,10 @@ func pingRedis(pool *redis.Pool) (bool, error) {
 	return (data == "PONG"), err
 }
 
-func setupSMTPTransport(conf configuration.Mail) mailer.Transport {
-	var (
-		addr string
-	)
-
-	if conf.SMTP.Addr != "" {
-		addr = conf.SMTP.Addr
+func setupSMTPTransport(conf configuration.Mail) *mailer.Transport {
+	t, err := mailer.OpenTransport(context.Background(), conf.TransportURL)
+	if err != nil {
+		panic(err)
 	}
-
-	options := &smtptransport.Options{
-		Addr:     addr,
-		Username: conf.SMTP.Username,
-		Password: conf.SMTP.Password,
-	}
-
-	return smtptransport.NewSMTPTransport(options)
+	return t
 }

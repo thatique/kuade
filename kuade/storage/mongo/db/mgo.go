@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"github.com/thatique/kuade/pkg/text"
 	"github.com/thatique/kuade/pkg/mango"
+	"github.com/thatique/kuade/pkg/text"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var models = []Model{}
@@ -38,7 +38,7 @@ type Updatable interface {
 
 type Client struct {
 	*mango.Client
-	DB      *mango.Database // default db
+	DB *mango.Database // default db
 }
 
 func Register(m Model) {
@@ -47,7 +47,7 @@ func Register(m Model) {
 
 func registerIndexes(client *Client, m Model) error {
 	collection := client.DB.Collection(m.Col())
-	ixView     := collection.Indexes()
+	ixView := collection.Indexes()
 	// then register this index
 	_, err := ixView.CreateMany(context.Background(), m.Indexes())
 	return err
@@ -71,7 +71,7 @@ func Connect(ctx context.Context, urlstr string) (*Client, error) {
 
 	conn := &Client{
 		Client: mclient,
-		DB:      mclient.Database(db),
+		DB:     mclient.Database(db),
 	}
 
 	for _, model := range models {

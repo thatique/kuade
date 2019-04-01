@@ -3,13 +3,13 @@ package users
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/bson"
-	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/thatique/kuade/kuade/auth"
 	"github.com/thatique/kuade/kuade/storage/mongo/db"
 	"github.com/thatique/kuade/pkg/emailparser"
+	"go.mongodb.org/mongo-driver/bson"
+	bsonp "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func init() {
@@ -58,15 +58,15 @@ func (user *userMgo) Col() string {
 func (user *userMgo) Indexes() []mongo.IndexModel {
 	return []mongo.IndexModel{
 		mongo.IndexModel{
-			Keys: bson.D{{"email", "1"}},
+			Keys:    bson.D{{"email", "1"}},
 			Options: (&options.IndexOptions{}).SetUnique(true),
 		},
 		mongo.IndexModel{
-			Keys: bson.D{{"slug", "1"}},
+			Keys:    bson.D{{"slug", "1"}},
 			Options: (&options.IndexOptions{}).SetUnique(true),
 		},
 		mongo.IndexModel{
-			Keys: bson.D{{"identities.name", 1}, {"identities.key", 1}},
+			Keys:    bson.D{{"identities.name", 1}, {"identities.key", 1}},
 			Options: (&options.IndexOptions{}).SetUnique(true).SetSparse(true),
 		},
 	}

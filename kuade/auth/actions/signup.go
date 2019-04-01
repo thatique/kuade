@@ -17,14 +17,14 @@ type SignupAction struct {
 	Name, Email string // required
 
 	// Password and confirmation, required
-	Password1  string
-	Password2  string
+	Password1 string
+	Password2 string
 
 	// Only valid when the role is: ROLE_INDIVIDUAL or ROLE_VENDOR, required
-	Role       auth.Role
+	Role auth.Role
 
 	// Optional fields, personal data
-	Age        uint8
+	Age                  uint8
 	Address, City, State string
 
 	// the result record if any
@@ -67,16 +67,16 @@ func (action *SignupAction) Validate(cuser *auth.User, service *service.Service)
 	// success
 	user := &auth.User{
 		Profile: auth.Profile{
-			Name: action.Name,
-			Age:  action.Age,
+			Name:    action.Name,
+			Age:     action.Age,
 			Address: action.Address,
-			City: action.City,
-			State: action.State,
+			City:    action.City,
+			State:   action.State,
 		},
 		Email: action.Email,
 		Role:  action.Role,
 		Credentials: auth.Credentials{
-			Enabled: true,
+			Enabled:   true,
 			CreatedAt: time.Now().UTC(),
 		},
 	}

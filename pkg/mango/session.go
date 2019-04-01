@@ -31,7 +31,6 @@ func (sess *Session) AbortTransaction(ctx context.Context) error {
 	return err
 }
 
-
 func (sess *Session) CommitTransaction(ctx context.Context) error {
 	ctx, span := roundtripTrackingSpan(ctx, fmt.Sprintf("%s.Session.CommitTransaction", modulestr))
 	defer span.end(ctx)

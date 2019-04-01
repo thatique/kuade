@@ -7,6 +7,12 @@ import (
 	"net/smtp"
 )
 
+var (
+	ErrTLSRequired      = errors.New("mailer.smtp: login mechanism need TLS connection")
+	ErrInvalidHost      = errors.New("mailer.smtp: invalid servername/host")
+	ErrAuthNotSupported = errors.New("mailer.smpt: Auth not supported")
+)
+
 // loginAuth is an smtp.Auth that implements the LOGIN authentication mechanism.
 type loginAuth struct {
 	username string
@@ -24,11 +30,11 @@ func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
 			}
 		}
 		if !advertised {
-			return "", nil, errors.New("gomail: unencrypted connection")
+			return "", nil, ErrTLSRequired
 		}
 	}
 	if server.Name != a.host {
-		return "", nil, errors.New("gomail: wrong host name")
+		return "", nil, ErrInvalidHost
 	}
 	return "LOGIN", nil, nil
 }

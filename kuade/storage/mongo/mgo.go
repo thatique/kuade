@@ -35,8 +35,10 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 
 func New(param *MongoParam) (*Driver, error) {
 	c, err := db.Connect(context.Background(), param.URL)
-
-	return &Driver{c: conn}, nil
+	if err != nil {
+		return nil, err
+	}
+	return &Driver{c: c}, nil
 }
 
 func (driver *Driver) Name() string {

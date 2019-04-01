@@ -2,8 +2,8 @@ package mango
 
 import (
 	"context"
-	"sync"
 	"fmt"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

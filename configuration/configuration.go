@@ -146,19 +146,7 @@ type LogHook struct {
 }
 
 type Mail struct {
-	SMTP struct {
-		// Addr defines smtp host address
-		Addr string `yaml:"addr,omitempty"`
-
-		// Username defines user name to smtp host
-		Username string `yaml:"username,omitempty"`
-
-		// Password defines password of login user
-		Password string `yaml:"password,omitempty"`
-
-		// Insecure defines if smtp login skips the secure certification.
-		Insecure bool `yaml:"insecure,omitempty"`
-	} `yaml:"smtp,omitempty"`
+	TransportURL string `yaml:"transporturl"`
 
 	From string `yaml:"from,omitempty"`
 

@@ -6,10 +6,10 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/thatique/kuade/pkg/kerr"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
 	"go.opencensus.io/trace"
-	"github.com/thatique/kuade/pkg/kerr"
 )
 
 // A Tracer supports OpenCensus tracing and latency metrics.

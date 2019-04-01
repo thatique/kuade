@@ -25,10 +25,10 @@ var latencyDistribution = view.Distribution(
 
 var allViews = []*view.View{
 	{
-		Name:         "mongo/client/latency",
-		Description:  "The latency of the various calls",
-		Aggregation:  latencyDistribution,
-		TagKeys:      []tag.Key{keyMethod, keyStatus, keyError},
+		Name:        "mongo/client/latency",
+		Description: "The latency of the various calls",
+		Aggregation: latencyDistribution,
+		TagKeys:     []tag.Key{keyMethod, keyStatus, keyError},
 	},
 	{
 		Name:        "mongo/client/calls",

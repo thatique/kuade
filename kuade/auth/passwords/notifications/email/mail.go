@@ -12,11 +12,11 @@ import (
 
 type MailNotifier struct {
 	Sender    string
-	transport mailer.Transport
+	transport *mailer.Transport
 	queue     *queue.Queue
 }
 
-func NewMailNotifier(sender string, m mailer.Transport, q *queue.Queue) *MailNotifier {
+func NewMailNotifier(sender string, m *mailer.Transport, q *queue.Queue) *MailNotifier {
 	return &MailNotifier{Sender: sender, transport: m, queue: q}
 }
 

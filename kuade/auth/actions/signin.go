@@ -16,7 +16,7 @@ type SignInAction struct {
 	Email    string
 	Password string
 
-	user     *auth.User
+	user *auth.User
 }
 
 func (action *SignInAction) Validate(user *auth.User, service *service.Service) *validation.Result {

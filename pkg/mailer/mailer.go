@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/emersion/go-message"
-	"github.com/thatique/kuade/pkg/mailer/driver"
 	"github.com/thatique/kuade/pkg/kerr"
+	"github.com/thatique/kuade/pkg/mailer/driver"
 	"github.com/thatique/kuade/pkg/metrics"
 	"github.com/thatique/kuade/pkg/openurl"
 )
@@ -16,7 +16,7 @@ import (
 const pkgName = "github.com/thatique/kuade/pkg/mailer"
 
 var (
-	latencyMeasure  = metrics.LatencyMeasure(pkgName)
+	latencyMeasure = metrics.LatencyMeasure(pkgName)
 
 	// OpenCensusViews are predefined views for OpenCensus metrics.
 	// The views include counts and latency distributions for API method calls.
@@ -29,7 +29,7 @@ type Transport struct {
 	tracer    *metrics.Tracer
 }
 
-func NewMailer(transport driver.Transport) *Transport {
+func NewTransport(transport driver.Transport) *Transport {
 	return &Transport{
 		transport: transport,
 		tracer: &metrics.Tracer{
@@ -77,7 +77,7 @@ func wrapError(m *Transport, err error) error {
 	if kerr.DoNotWrap(err) {
 		return err
 	}
-	return kerr.New(m.transport.ErrorCode(err), err, 2, "secrets")
+	return kerr.New(m.transport.ErrorCode(err), err, 2, "mailer")
 }
 
 type TransportURLOpener interface {
@@ -91,11 +91,11 @@ type URLMux struct {
 // RegisterKeeper registers the opener with the given scheme. If an opener
 // already exists for the scheme, RegisterKeeper panics.
 func (mux *URLMux) RegisterTransport(scheme string, opener TransportURLOpener) {
-	mux.schemes.Register("transport", "Mailer", scheme, opener)
+	mux.schemes.Register("mailer", "Transport", scheme, opener)
 }
 
 func (mux *URLMux) OpenTransport(ctx context.Context, urlstr string) (*Transport, error) {
-	opener, u, err := mux.schemes.FromString("Mailer", urlstr)
+	opener, u, err := mux.schemes.FromString("Transport", urlstr)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (mux *URLMux) OpenTransport(ctx context.Context, urlstr string) (*Transport
 // OpenTransportURL dispatches the URL to the opener that is registered with the
 // URL's scheme. OpenTransportURL is safe to call from multiple goroutines.
 func (mux *URLMux) OpenTransportURL(ctx context.Context, u *url.URL) (*Transport, error) {
-	opener, err := mux.schemes.FromURL("Mailer", u)
+	opener, err := mux.schemes.FromURL("Transport", u)
 	if err != nil {
 		return nil, err
 	}

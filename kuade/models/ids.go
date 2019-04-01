@@ -80,7 +80,7 @@ func (oid ObjectID) MarshalJSON() ([]byte, error) {
 }
 
 func (oid *ObjectID) UnmarshalJSON(data []byte) error {
-	if len(data) != 26{
+	if len(data) != 26 {
 		return ErrInValidObjectID
 	}
 	if data[0] != '"' || data[25] != '"' {

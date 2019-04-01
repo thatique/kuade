@@ -4,15 +4,14 @@ import (
 	"context"
 
 	"github.com/emersion/go-message"
-	"github.com/thatique/kuade/pkg/mailer/driver"
 )
 
 type JobMail struct {
-	t        driver.Transport
+	t        *Transport
 	messages []*message.Entity
 }
 
-func NewJobMail(t driver.Transport, messages []*message.Entity) *JobMail {
+func NewJobMail(t *Transport, messages []*message.Entity) *JobMail {
 	return &JobMail{t: t, messages: messages}
 }
 
