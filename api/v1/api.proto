@@ -1,0 +1,67 @@
+syntax="proto3";
+
+package kuade.proto;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "proto";
+
+// Enable gogoprotobuf extensions (https://github.com/gogo/protobuf/blob/master/extensions.md).
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+
+// Points are represented as latitude-longitude pairs
+message Point {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message Rectangle {
+    Point lo = 1 [(gogoproto.nullable) = false];;
+    Point hi = 2 [(gogoproto.nullable) = false];;
+}
+
+// Filter available vendors at given viewport
+message GeoFilterVendor {
+    Rectangle viewport = 1 [(gogoproto.nullable) = false];
+    int32     zoom     = 2;
+}
+
+message Decimal128 {
+    uint64 high = 1;
+    uint64 low  = 2;
+}
+
+message Tag {
+    bytes id = 1 [
+        (gogoproto.nullable) = false,
+        (gogoproto.customname) = "ObjectID",
+        (gogoproto.customtype) = "ObjectID"
+    ];
+    string name = 2;
+}
+
+message Vendor {
+    bytes id = 1 [
+        (gogoproto.nullable) = false,
+        (gogoproto.customname) = "ObjectID",
+        (gogoproto.customtype) = "ObjectID"
+    ];
+    string name        = 2;
+    string icon        = 3;
+    string description = 4;
+    Decimal128  price  = 5 [(gogoproto.nullable) = false];
+    Point coordinates  = 6 [(gogoproto.nullable) = false];
+    // address
+    string address     = 7;
+    string city        = 8;
+    string state       = 9;
+    string zipcode     = 10;
+}

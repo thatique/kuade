@@ -5,6 +5,33 @@ import (
 	"strings"
 )
 
+// SearchQuery is free semiring on Term where `AND` operation is `*` and `OR` is `+`
+type SearchQuery [][]Term
+
+func NewSearchQuery(t Term) SearchQuery {
+	return [][]Term{[]Term{t}}
+}
+
+func (q SearchQuery) And(q2 SearchQuery) SearchQuery {
+	return sliceBind(q, func(xs []Term) SearchQuery {
+		return sliceBind(q2, func(ys []Term) SearchQuery {
+			return [][]Term{append(xs, ys...)}
+		})
+	})
+}
+
+func (q SearchQuery) Or(q2 SearchQuery) SearchQuery {
+	return append(q, q2...)
+}
+
+func sliceBind(xs SearchQuery, f func([]Term) SearchQuery) SearchQuery {
+	var result SearchQuery
+	for _, terms := range xs {
+		result = append(result, f(terms)...)
+	}
+	return result
+}
+
 type Term struct {
 	Include   bool
 	Labels    []Label

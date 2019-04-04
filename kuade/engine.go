@@ -175,8 +175,9 @@ func (engine *Engine) ListenAndServe() error {
 		c, cancel := context.WithTimeout(context.Background(), drainTimeout)
 		defer cancel()
 		// call application shutdown
+		err := engine.server.Shutdown(c)
 		engine.app.Shutdown(c)
-		return engine.server.Shutdown(c)
+		return err
 	}
 }
 

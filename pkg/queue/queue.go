@@ -88,7 +88,7 @@ func (q *Queue) SetOnExpiredJob(fn func(jobName string, now time.Time) bool) {
 func (q *Queue) Len() int {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
-	return q.exps.Len()
+	return q.exps.Len()+len(q.jobCh)
 }
 
 func (q *Queue) Push(job Job) {
