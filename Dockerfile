@@ -31,8 +31,6 @@ FROM alpine:3.7
 
 RUN apk add tini
 
-ENV THATIQUE_CONFIGURATION_PATH="/data/thatique-config.yml"
-
 COPY --from=builder /go/bin/kuade /usr/bin/kuade
 
 VOLUME ["/data"]

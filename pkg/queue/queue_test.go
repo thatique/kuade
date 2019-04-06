@@ -41,7 +41,7 @@ func TestBasicOperation(t *testing.T) {
 	}
 
 	if executed != 100 {
-		t.Fatalf("expecting delayed job executed equal to '%v', got '%v'", 0, n)
+		t.Fatalf("expecting delayed job executed equal to '%v', got '%v'", 100, executed)
 	}
 
 	queue.Stop()

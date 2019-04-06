@@ -8,6 +8,11 @@ import (
 
 var showVersion bool
 
+func init() {
+	serveCommand.Flags().StringVarP(&httpAddr, "bind", "b", "", "Address to binf")
+	RootCmd.AddCommand(serveCommand)
+}
+
 var RootCmd = &cobra.Command{
 	Use:   "Thatique",
 	Short: "Thatique's CLI application to manage thatique server",

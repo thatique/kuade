@@ -1,0 +1,37 @@
+syntax="proto3";
+
+package kuade.app.models;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "model";
+
+// Enable gogoprotobuf extensions (https://github.com/gogo/protobuf/blob/master/extensions.md).
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+
+enum UserStatus {
+    INACTIVE = 0;
+    ACTIVE   = 1;
+    LOCKED   = 2;
+}
+
+enum UserRole {
+    INDIVIDUAL = 0;
+    VENDOR     = 1;
+    STAFF      = 2;
+    SUPERUSER  = 3;
+}
+
+message PasswordChangeToken {
+    string token      = 1;
+    string email      = 2;
+    bytes  password   = 3;
+    int64  created_at = 4;
+}

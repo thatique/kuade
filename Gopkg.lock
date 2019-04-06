@@ -75,6 +75,18 @@
   version = "v3.2.0"
 
 [[projects]]
+  digest = "1:4652941215f23c7ad6546bab86964c72248a1134baa53f0df618661344ba5cac"
+  name = "github.com/gogo/protobuf"
+  packages = [
+    "gogoproto",
+    "proto",
+    "protoc-gen-gogo/descriptor",
+  ]
+  pruneopts = "UT"
+  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
+  version = "v1.2.1"
+
+[[projects]]
   digest = "1:318f1c959a8a740366fce4b1e1eb2fd914036b4af58fbd0a003349b305f118ad"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -504,6 +516,9 @@
     "github.com/bshuster-repo/logrus-logstash-hook",
     "github.com/bugsnag/bugsnag-go",
     "github.com/emersion/go-message",
+    "github.com/gogo/protobuf/gogoproto",
+    "github.com/gogo/protobuf/proto",
+    "github.com/golang/protobuf/proto",
     "github.com/gomodule/redigo/redis",
     "github.com/google/btree",
     "github.com/gorilla/csrf",

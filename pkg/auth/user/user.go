@@ -32,6 +32,8 @@ type Info interface {
 	GetMetadata() map[string][]string
 }
 
+// DefaultInfo provides a simple user information exchange object
+// for components that implement the UserInfo interface.
 type DefaultInfo struct {
 	Name     string
 	UID      string

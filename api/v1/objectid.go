@@ -1,4 +1,4 @@
-package proto
+package v1
 
 import (
 	"bytes"
@@ -43,6 +43,24 @@ func NewObjectIdWithTime(t time.Time) ObjectID {
 	putUint24(b[9:12], atomic.AddUint32(&objectIDCounter, 1))
 
 	return b
+}
+
+// ObjectIDFromHex creates a new ObjectID from a hex string. It returns an error if the hex string is not a
+// valid ObjectID.
+func ObjectIDFromHex(s string) (ObjectID, error) {
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		return NilObjectID, err
+	}
+
+	if len(b) != 12 {
+		return NilObjectID, ErrInValidObjectID
+	}
+
+	var oid [12]byte
+	copy(oid[:], b[:])
+
+	return oid, nil
 }
 
 func (oid ObjectID) Hex() string {

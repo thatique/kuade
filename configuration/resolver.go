@@ -14,20 +14,6 @@ var (
 	CfgDir configdir.ConfigDir
 )
 
-const (
-	// Directory contains below files/directories for HTTPS configuration.
-	certsDir = "certs"
-
-	// Directory contains all CA certificates other than system defaults for HTTPS.
-	certsCADir = "CAs"
-
-	// Public certificate file for HTTPS.
-	publicCertFile = "public.crt"
-
-	// Private key file for HTTPS.
-	privateKeyFile = "private.key"
-)
-
 func init() {
 	CfgDir = configdir.New("thatiq", "kuade")
 	CfgDir.LocalPath, _ = filepath.Abs(".")

@@ -1,11 +1,10 @@
 syntax="proto3";
 
-package kuade.proto;
+package kuade.api.v1;
 
 import "gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
 
-option go_package = "proto";
+option go_package = "v1";
 
 // Enable gogoprotobuf extensions (https://github.com/gogo/protobuf/blob/master/extensions.md).
 // Enable custom Marshal method.

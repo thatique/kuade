@@ -5,15 +5,12 @@ import (
 	"time"
 
 	"github.com/google/btree"
-	"github.com/thatique/kuade/pkg/uuid"
 )
 
 var (
 	// Loggerf can be used to override the default logging destination. Such
 	// log messages in this library should be logged at info or higher.
 	Loggerf = func(format string, args ...interface{}) {}
-
-	defaultUUID = uuid.Generate()
 )
 
 // Default number of btree degrees
@@ -28,7 +25,6 @@ type Job interface {
 }
 
 type delayedJob struct {
-	id    uuid.UUID
 	job   Job
 	delay time.Time
 }
@@ -45,7 +41,7 @@ func (dj *delayedJob) Less(item btree.Item) bool {
 	if dj.delay.After(dj2.delay) {
 		return false
 	}
-	return dj.id.String() < dj2.id.String()
+	return dj.job.GetName() < dj2.job.GetName()
 }
 
 type Queue struct {
@@ -88,7 +84,7 @@ func (q *Queue) SetOnExpiredJob(fn func(jobName string, now time.Time) bool) {
 func (q *Queue) Len() int {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
-	return q.exps.Len()+len(q.jobCh)
+	return q.exps.Len() + len(q.jobCh)
 }
 
 func (q *Queue) Push(job Job) {
@@ -100,23 +96,25 @@ func (q *Queue) Later(expired time.Duration, job Job) {
 	defer q.mu.Unlock()
 
 	q.exps.ReplaceOrInsert(&delayedJob{
-		id:    uuid.Generate(),
 		delay: time.Now().Add(expired),
 		job:   job,
 	})
 }
 
 func (q *Queue) getExpiredJobs() []*delayedJob {
-	q.mu.RLock()
-	defer q.mu.RUnlock()
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	var expired []*delayedJob
 	q.exps.AscendLessThan(&delayedJob{
-		id:    defaultUUID,
 		delay: time.Now(),
 	}, func(item btree.Item) bool {
 		expired = append(expired, item.(*delayedJob))
 		return true
 	})
+
+	for _, item := range expired {
+		q.exps.Delete(item)
+	}
 
 	return expired
 }
@@ -126,17 +124,12 @@ func (q *Queue) processExpiredJobs(jobs []*delayedJob) <-chan bool {
 	out := make(chan bool)
 
 	send := func(itm *delayedJob) {
-		q.mu.Lock()
-		defer q.mu.Unlock()
 		if q.onExpiredJob == nil {
 			q.jobCh <- itm.job
-
-			q.exps.Delete(itm)
 		} else {
 			needRun := q.onExpiredJob(itm.job.GetName(), time.Now().UTC())
 			if needRun {
 				q.jobCh <- itm.job
-				q.exps.Delete(itm)
 			}
 		}
 		wg.Done()
