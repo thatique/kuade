@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"github.com/syaiful6/thatique/uuid"
+	"github.com/thatique/kuade/pkg/uuid"
 )
 
 // Common errors used with this package.

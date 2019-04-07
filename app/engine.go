@@ -18,8 +18,8 @@ import (
 	gorhandlers "github.com/gorilla/handlers"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/app/listener"
+	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/pkg/uuid"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
 	"github.com/thatique/kuade/version"

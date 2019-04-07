@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/thatique/kuade/assets"
-	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/app"
 	"github.com/thatique/kuade/app/handlers"
+	"github.com/thatique/kuade/assets"
+	"github.com/thatique/kuade/configuration"
 )
 
 var httpAddr string

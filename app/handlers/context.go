@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 
-	"github.com/thatique/kuade/app/model"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
 )
 
@@ -16,15 +15,6 @@ type Context struct {
 // correct context.
 func (ctx *Context) Value(key interface{}) interface{} {
 	return ctx.Context.Value(key)
-}
-
-func (ctx *Context) User() (*model.User, error) {
-	r, err := webcontext.GetRequest(ctx)
-	if err != nil {
-		return nil, err
-	}
-	user := ctx.authSess.User(r)
-	return user, nil
 }
 
 func getName(ctx context.Context) (name string) {

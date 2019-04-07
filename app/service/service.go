@@ -6,9 +6,9 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 
-	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/app/storage/factory"
+	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/pkg/mailer"
 	"github.com/thatique/kuade/pkg/queue"
 )

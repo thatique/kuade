@@ -300,14 +300,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0548c16cd26121fdea8a3bd76b04995f02aac7832b0c443f07a1b11407990f21"
-  name = "github.com/syaiful6/thatique"
-  packages = ["uuid"]
-  pruneopts = "UT"
-  revision = "98b8c14789f9d762b962ba433da9d603491679b5"
-
-[[projects]]
-  branch = "master"
   digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
   name = "github.com/xdg/scram"
   packages = ["."]
@@ -396,28 +388,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
-  name = "golang.org/x/net"
-  packages = [
-    "context",
-    "context/ctxhttp",
-  ]
-  pruneopts = "UT"
-  revision = "74de082e2cca95839e88aa0aeee5aadf6ce7710f"
-
-[[projects]]
-  branch = "master"
-  digest = "1:9927d6aceb89d188e21485f42a7a254e67e6fdcf4260aba375fe18e3c300dfb4"
-  name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "internal",
-  ]
-  pruneopts = "UT"
-  revision = "c85d3e98c914e3a33234ad863dcbff5dbc425bb8"
-
-[[projects]]
-  branch = "master"
   digest = "1:75515eedc0dc2cb0b40372008b616fa2841d831c63eedd403285ff286c593295"
   name = "golang.org/x/sync"
   packages = ["semaphore"]
@@ -477,22 +447,6 @@
   revision = "d61658bd2e18010be0e21349cc92b1b706e35146"
 
 [[projects]]
-  digest = "1:6eb6e3b6d9fffb62958cf7f7d88dbbe1dd6839436b0802e194c590667a40412a"
-  name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch",
-  ]
-  pruneopts = "UT"
-  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
-  version = "v1.5.0"
-
-[[projects]]
   branch = "v1"
   digest = "1:af715ae33cc1f5695c4b2a4e4b21d008add8802a99e15bb467ac7c32edb5000d"
   name = "gopkg.in/check.v1"
@@ -533,7 +487,6 @@
     "github.com/spf13/cobra",
     "github.com/syaiful6/sersan",
     "github.com/syaiful6/sersan/redis",
-    "github.com/syaiful6/thatique/uuid",
     "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/bson/primitive",
     "go.mongodb.org/mongo-driver/mongo",
@@ -544,7 +497,6 @@
     "go.opencensus.io/tag",
     "go.opencensus.io/trace",
     "golang.org/x/crypto/bcrypt",
-    "golang.org/x/oauth2",
     "golang.org/x/time/rate",
     "golang.org/x/xerrors",
     "gopkg.in/check.v1",

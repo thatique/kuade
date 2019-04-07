@@ -32,7 +32,7 @@ type SignupAction struct {
 }
 
 func (action *SignupAction) Validate(cuser *model.User, service *service.Service) *validation.Result {
-	if cuser != nil && cuser.Role != model.UserRole_STAFF && cuser.Role != model.UserRole_SUPERUSER {
+	if cuser != nil {
 		return validation.Error(errors.New("Logout dulu untuk daftar akun"))
 	}
 

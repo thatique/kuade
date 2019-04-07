@@ -14,10 +14,10 @@ import (
 	"github.com/syaiful6/sersan"
 	redistore "github.com/syaiful6/sersan/redis"
 
-	"github.com/thatique/kuade/configuration"
 	"github.com/thatique/kuade/app"
 	"github.com/thatique/kuade/app/auth"
 	"github.com/thatique/kuade/app/service"
+	"github.com/thatique/kuade/configuration"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
 	"github.com/thatique/kuade/pkg/web/handlers"
 )
