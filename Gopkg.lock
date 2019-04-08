@@ -256,12 +256,28 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:2ee0f15eb0fb04f918db7c2dcf39745f40d69f798ef171610a730e8a56aaa4fd"
+  name = "github.com/russross/blackfriday"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d3b5b032dc8e8927d31a5071b56e14c89f045135"
+  version = "v2.0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:8209ed8bf2336848aa760c11e809f93ba96fffa64d3c2948e970a362a46e534b"
   name = "github.com/shibukawa/configdir"
   packages = ["."]
   pruneopts = "UT"
   revision = "e180dbdc8da04c4fa04272e875ce64949f38bd3e"
+
+[[projects]]
+  digest = "1:9421f6e9e28ef86933e824b5caff441366f2b69bb281085b9dca40e1f27a1602"
+  name = "github.com/shurcooL/sanitized_anchor_name"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7bfe4c7ecddb3666a94b053b422cdd8f5aaa3615"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:e4c72127d910a96daf869a44f3dd563b86dbe6931a172863a0e99c5ff04b59e4"
@@ -482,6 +498,7 @@
     "github.com/minio/minio-go/pkg/set",
     "github.com/minio/minio/pkg/wildcard",
     "github.com/mozillazg/go-unidecode",
+    "github.com/russross/blackfriday",
     "github.com/shibukawa/configdir",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
