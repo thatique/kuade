@@ -11,7 +11,7 @@ const DefaultVersion = "2012-10-17"
 
 type Policy struct {
 	ID         ID          `json:"ID,omitempty"`
-	Version    string      `bson:"version"`
+	Version    string      `json:"version"`
 	Statements []Statement `json:"Statement"`
 }
 

@@ -2,18 +2,24 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
+	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 
+	appAuth "github.com/thatique/kuade/app/auth/authenticator"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/app/storage/factory"
 	"github.com/thatique/kuade/configuration"
+	"github.com/thatique/kuade/pkg/auth/authenticator"
+	authUnion "github.com/thatique/kuade/pkg/auth/request/union"
 	"github.com/thatique/kuade/pkg/mailer"
 	"github.com/thatique/kuade/pkg/queue"
 )
 
 type Service struct {
+	Authenticator authenticator.Request
 	Storage storage.Driver
 	Queue   *queue.Queue
 	Redis   *redis.Pool
@@ -26,14 +32,23 @@ func NewService(conf *configuration.Configuration) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	serviceAuth, err := configureAuthenticator(storage)
+	if err != nil {
+		return nil, err
+	}
+
 	var redisPool *redis.Pool
 	if conf.Redis.Addr != "" {
 		redisPool, err = newRedisPool(conf.Redis)
 	}
+
 	mailer := setupSMTPTransport(conf.Mail)
+	// queue
 	q := configureQueue(conf.Queue)
 
 	return &Service{
+		Authenticator: serviceAuth,
 		Storage: storage,
 		Queue:   q,
 		Redis:   redisPool,
@@ -44,6 +59,15 @@ func NewService(conf *configuration.Configuration) (*Service, error) {
 
 func (service *Service) Quit() {
 	service.Queue.Stop()
+}
+
+func configureAuthenticator(storage storage.Driver) (authenticator.Request, error) {
+	users, err := storage.GetUserStorage()
+	if err != nil {
+		return nil, err
+	}
+	session := appAuth.NewSessionAuthenticator(users)
+	return authUnion.New(session), nil
 }
 
 func configureQueue(conf configuration.Queue) *queue.Queue {
@@ -120,4 +144,15 @@ func setupSMTPTransport(conf configuration.Mail) *mailer.Transport {
 		panic(err)
 	}
 	return t
+}
+
+func configureSecretKey(s string) []byte {
+	if strings.HasPrefix(s, "base64:") {
+		key, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(s, "base64:"))
+		if err != nil {
+			panic(err)
+		}
+		return key
+	}
+	return []byte(s)
 }

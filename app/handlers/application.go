@@ -15,7 +15,7 @@ import (
 	redistore "github.com/syaiful6/sersan/redis"
 
 	"github.com/thatique/kuade/app"
-	"github.com/thatique/kuade/app/auth"
+	"github.com/thatique/kuade/app/auth/authenticator"
 	"github.com/thatique/kuade/app/service"
 	"github.com/thatique/kuade/configuration"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
@@ -27,7 +27,6 @@ type App struct {
 	// assets function
 	asset func(string) ([]byte, error)
 
-	authSess *auth.Session
 	router   *mux.Router
 	service  *service.Service
 }
@@ -52,13 +51,6 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 	app.service = svc
 	app.router = router
 
-	userStorage, err := svc.Storage.GetUserStorage()
-	if err != nil {
-		return nil, err
-	}
-
-	app.authSess = auth.NewUserSession(userStorage)
-
 	sessionState, err := app.configureSersan(conf)
 	if err != nil {
 		return nil, err
@@ -66,7 +58,6 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 
 	webMiddlewares := handlers.NewIfRequestMiddleware([]mux.MiddlewareFunc{
 		sersan.SessionMiddleware(sessionState),
-		app.authSess.Middleware,
 		csrf.Protect([]byte(conf.HTTP.Secret), csrf.Secure(conf.HTTP.Secure)),
 	}, isNotApiRoute)
 	// middleware
@@ -108,7 +99,7 @@ func (app *App) configureSersan(conf *configuration.Configuration) (*sersan.Serv
 		return nil, errors.New("http session keys must not be empty.")
 	}
 	sessionstate := sersan.NewServerSessionState(sersanstore, sessionKeys...)
-	sessionstate.AuthKey = auth.UserSessionKey
+	sessionstate.AuthKey = authenticator.UserSessionKey
 	sessionstate.Options.Secure = conf.HTTP.Secure
 
 	return sessionstate, nil
