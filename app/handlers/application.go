@@ -77,11 +77,21 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 	// middleware
 	app.router.Use(webMiddlewares.Middleware)
 
+	app.registerRoutes()
+
+	return app, nil
+}
+
+func (app *App) registerRoutes() {
 	// static files
 	app.router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(handlers.NewStaticFS("assets/static", app.asset))))
-
-	return app, nil
+	// page
+	app.router.Handle("/", app.dispatch(&pageHandler{
+		title: "Thatiq",
+		description: "Executive",
+		templates: []string{"base.html", "homepage.html"},
+	}))
 }
 
 func (app *App) Shutdown(ctx context.Context) error {

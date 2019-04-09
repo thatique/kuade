@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
-	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -125,15 +123,4 @@ func setupSMTPTransport(conf configuration.Mail) *mailer.Transport {
 		panic(err)
 	}
 	return t
-}
-
-func configureSecretKey(s string) []byte {
-	if strings.HasPrefix(s, "base64:") {
-		key, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(s, "base64:"))
-		if err != nil {
-			panic(err)
-		}
-		return key
-	}
-	return []byte(s)
 }
