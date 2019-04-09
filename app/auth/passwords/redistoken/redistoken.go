@@ -78,7 +78,7 @@ func (gen *RedisTokenGenerator) Delete(token string) error {
 		return err
 	}
 
-	tokKey := gen.keyPrefix+token
+	tokKey := gen.keyPrefix + token
 	key, err := redis.String(conn.Do("GET", tokKey))
 	if err != nil {
 		return err

@@ -8,18 +8,14 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 
-	appAuth "github.com/thatique/kuade/app/auth/authenticator"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/app/storage/factory"
 	"github.com/thatique/kuade/configuration"
-	"github.com/thatique/kuade/pkg/auth/authenticator"
-	authUnion "github.com/thatique/kuade/pkg/auth/request/union"
 	"github.com/thatique/kuade/pkg/mailer"
 	"github.com/thatique/kuade/pkg/queue"
 )
 
 type Service struct {
-	Authenticator authenticator.Request
 	Storage storage.Driver
 	Queue   *queue.Queue
 	Redis   *redis.Pool
@@ -29,11 +25,6 @@ type Service struct {
 
 func NewService(conf *configuration.Configuration) (*Service, error) {
 	storage, err := factory.Create(conf.Storage.Type(), conf.Storage.Parameters())
-	if err != nil {
-		return nil, err
-	}
-
-	serviceAuth, err := configureAuthenticator(storage)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +39,6 @@ func NewService(conf *configuration.Configuration) (*Service, error) {
 	q := configureQueue(conf.Queue)
 
 	return &Service{
-		Authenticator: serviceAuth,
 		Storage: storage,
 		Queue:   q,
 		Redis:   redisPool,
@@ -59,15 +49,6 @@ func NewService(conf *configuration.Configuration) (*Service, error) {
 
 func (service *Service) Quit() {
 	service.Queue.Stop()
-}
-
-func configureAuthenticator(storage storage.Driver) (authenticator.Request, error) {
-	users, err := storage.GetUserStorage()
-	if err != nil {
-		return nil, err
-	}
-	session := appAuth.NewSessionAuthenticator(users)
-	return authUnion.New(session), nil
 }
 
 func configureQueue(conf configuration.Queue) *queue.Queue {

@@ -18,17 +18,21 @@ import (
 	"github.com/thatique/kuade/app/auth/authenticator"
 	"github.com/thatique/kuade/app/service"
 	"github.com/thatique/kuade/configuration"
+	pkgAuth "github.com/thatique/kuade/pkg/auth/authenticator"
+	authUnion "github.com/thatique/kuade/pkg/auth/request/union"
 	webcontext "github.com/thatique/kuade/pkg/web/context"
 	"github.com/thatique/kuade/pkg/web/handlers"
+	"github.com/thatique/kuade/pkg/web/template"
 )
 
 type App struct {
 	context.Context
 	// assets function
-	asset func(string) ([]byte, error)
-
-	router   *mux.Router
-	service  *service.Service
+	asset         func(string) ([]byte, error)
+	authenticator pkgAuth.Request
+	router        *mux.Router
+	renderer      *template.Renderer
+	service       *service.Service
 }
 
 func NewApp(asset func(string) ([]byte, error)) app.Application {
@@ -50,6 +54,16 @@ func (app *App) GetHTTPHandler(ctx context.Context, conf *configuration.Configur
 	router := routerWithPrefix(conf.HTTP.Prefix)
 	app.service = svc
 	app.router = router
+
+	// html template renderer
+	app.renderer = template.New(app.asset)
+
+	// configure authenticator
+	users, err := svc.Storage.GetUserStorage()
+	if err != nil {
+		return nil, err
+	}
+	app.authenticator = authUnion.New(authenticator.NewSessionAuthenticator(users))
 
 	sessionState, err := app.configureSersan(conf)
 	if err != nil {
@@ -105,22 +119,44 @@ func (app *App) configureSersan(conf *configuration.Configuration) (*sersan.Serv
 	return sessionstate, nil
 }
 
+type Dispatcher interface {
+	DispatchHTTP(ctx *Context, r *http.Request) http.Handler
+}
+
+type DispatcherFunc func(ctx *Context, r *http.Request) http.Handler
+
+func (d DispatcherFunc) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
+	return d(ctx, r)
+}
+
+func (app *App) dispatchFunc(dispatch DispatcherFunc) http.Handler {
+	return app.dispatch(dispatch)
+}
+
+func (app *App) dispatch(dispatcher Dispatcher) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for headerName, headerValues := range app.service.Config.HTTP.Headers {
+			for _, value := range headerValues {
+				w.Header().Add(headerName, value)
+			}
+		}
+		ctx := app.context(w, r)
+
+		// sync up context on the request.
+		r = r.WithContext(ctx)
+		dispatcher.DispatchHTTP(ctx, r).ServeHTTP(w, r)
+	})
+}
+
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close() // ensure that request body is always closed.
 
 	// Prepare the context with our own little decorations.
-	ctx := app.context(w, r)
+	ctx := r.Context()
 	ctx = webcontext.WithRequest(ctx, r)
 	ctx, w = webcontext.WithResponseWriter(ctx, w)
 	ctx = webcontext.WithLogger(ctx, webcontext.GetRequestLogger(ctx))
-	// sync the context
 	r = r.WithContext(ctx)
-
-	for headerName, headerValues := range app.service.Config.HTTP.Headers {
-		for _, value := range headerValues {
-			w.Header().Add(headerName, value)
-		}
-	}
 
 	defer func() {
 		status, ok := ctx.Value("http.response.status").(int)
@@ -134,7 +170,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // context constructs the context object for the application. This only be
 // called once per request.
-func (app *App) context(w http.ResponseWriter, r *http.Request) context.Context {
+func (app *App) context(w http.ResponseWriter, r *http.Request) *Context {
 	ctx := r.Context()
 	ctx = webcontext.WithVars(ctx, r)
 	ctx = webcontext.WithLogger(ctx, webcontext.GetLogger(ctx,
