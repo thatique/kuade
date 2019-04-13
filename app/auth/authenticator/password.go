@@ -7,8 +7,8 @@ import (
 
 	"github.com/thatique/kuade/app/model"
 	"github.com/thatique/kuade/app/storage"
-	"github.com/thatique/kuade/pkg/auth/authenticator"
 	"github.com/thatique/kuade/pkg/emailparser"
+	"github.com/thatique/kuade/pkg/iam/auth/authenticator"
 )
 
 var (

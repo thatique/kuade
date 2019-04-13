@@ -10,12 +10,12 @@ import (
 
 // Statement - policy statement.
 type Statement struct {
-	SID        ID                  `json:"Sid,omitempty" bson:"sid,omitempty"`
-	Effect     Effect              `json:"Effect" bson:"effect"`
-	Principal  Principal           `json:"Principal" bson:"principal"`
-	Actions    ActionSet           `json:"Action" bson:"action"`
-	Resources  ResourceSet         `json:"Resource" bson:"resource"`
-	Conditions condition.Functions `json:"Condition,omitempty" bson:"condition,omitempty"`
+	SID        ID                  `json:"Sid,omitempty"`
+	Effect     Effect              `json:"Effect"`
+	Principal  Principal           `json:"Principal"`
+	Actions    ActionSet           `json:"Action"`
+	Resources  ResourceSet         `json:"Resource"`
+	Conditions condition.Functions `json:"Condition,omitempty"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.

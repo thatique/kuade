@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/syaiful6/sersan"
-	"github.com/thatique/kuade/api/v1"
+	v1 "github.com/thatique/kuade/api/v1"
 	"github.com/thatique/kuade/app/model"
 	"github.com/thatique/kuade/app/storage"
-	"github.com/thatique/kuade/pkg/auth/authenticator"
+	"github.com/thatique/kuade/pkg/iam/auth/authenticator"
 )
 
 const (
