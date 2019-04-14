@@ -23,7 +23,6 @@ test:
 
 PROTOC := protoc
 PROTO_INCLUDES := \
-	-I api/v1 \
 	-I app/model \
 	-I $(GOPATH)/src \
 	-I $(GOPATH)/src/github.com/gogo/protobuf/protobuf \
@@ -31,16 +30,10 @@ PROTO_INCLUDES := \
 
 PROTO_GOGO_MAPPINGS := $(shell echo \
 		Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/protobuf/google/protobuf, \
-		Mkuade.api.v1=github.com/thatique/kuade/api/v1, \
 		Mkuade.app.model=github.com/thatique/kuade/app/model \
 	| sed 's/ //g')
 
 proto:
-	$(PROTOC) \
-		$(PROTO_INCLUDES) \
-		--gogo_out=plugins=grpc,$(PROTO_GOGO_MAPPINGS):$(PWD)/api/v1/ \
-		./api/v1/*.proto
-
 	$(PROTOC) \
 		$(PROTO_INCLUDES) \
 		--gogo_out=plugins=grpc,$(PROTO_GOGO_MAPPINGS):$(PWD)/app/model/ \

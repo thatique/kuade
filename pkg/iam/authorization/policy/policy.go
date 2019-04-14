@@ -40,8 +40,8 @@ func (iamp Policy) IsAllowed(args authorizer.Args) bool {
 		}
 	}
 
-	// first check if this arg is owner of the object
-	if args.ARN.IsOwnedBy(args.User.GetUID()) {
+	// first check if this arg is owner
+	if args.IsOwner {
 		return true
 	}
 

@@ -1,8 +1,9 @@
 syntax="proto3";
 
-package kuade.app.models;
+package kuade.app.model;
 
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "model";
 
@@ -23,7 +24,7 @@ enum UserStatus {
 }
 
 enum UserRole {
-    INDIVIDUAL = 0;
+    VISITOR    = 0;
     VENDOR     = 1;
     STAFF      = 2;
     SUPERUSER  = 3;
@@ -33,5 +34,73 @@ message PasswordChangeToken {
     string token      = 1;
     string email      = 2;
     bytes  password   = 3;
-    int64  created_at = 4;
+    google.protobuf.Timestamp created_at = 4 [
+        (gogoproto.stdtime) = true,
+        (gogoproto.nullable) = false
+    ];
+}
+
+message Point {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message Rectangle {
+    Point lo = 1 [(gogoproto.nullable) = false];
+    Point hi = 2 [(gogoproto.nullable) = false];
+}
+
+message User {
+    bytes id = 1 [
+        (gogoproto.nullable) = false,
+        (gogoproto.customname) = "ID",
+        (gogoproto.customtype) = "ID"
+    ];
+    string slug  = 2;
+    // name is non unique here
+    string name  = 3;
+    // email must be unique
+    string email = 4;
+    UserRole role = 5;
+    UserStatus status = 6;
+    google.protobuf.Timestamp created_at = 7 [
+        (gogoproto.stdtime) = true,
+        (gogoproto.nullable) = false
+    ];
+}
+
+message OauthProvider {
+    string name = 1;
+    string key  = 2;
+}
+
+message UserProfile {
+    string icon = 1;
+    string bio  = 2;
+    int32 age   = 3;
+
+    string address = 4;
+    string city    = 5;
+    string state   = 6;
+    string zipcode = 7;
+    Point point    = 8;
+}
+
+message Credentials {
+    string email = 1;
+    bytes password = 2;
+    bytes user_id = 3[
+        (gogoproto.nullable) = false,
+        (gogoproto.customname) = "UserID",
+        (gogoproto.customtype) = "ID"
+    ];
+    bool enabled = 4;
+    google.protobuf.Timestamp created_at = 5 [
+        (gogoproto.stdtime) = true,
+        (gogoproto.nullable) = false
+    ];
+    google.protobuf.Timestamp last_signin = 6 [
+        (gogoproto.stdtime) = true,
+        (gogoproto.nullable) = false
+    ];
 }

@@ -23,7 +23,7 @@ type passwordAuthenticator struct {
 }
 
 func runHasher(pswd string) {
-	var usr *model.User
+	var usr *model.Credentials
 	usr.SetPassword([]byte(pswd))
 }
 
@@ -32,11 +32,22 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 		return nil, false, errExpectedEmail
 	}
 
-	usr, err := pswd.users.FindUserByEmail(ctx, username)
+	creds, err = pswd.users.GetCredentialByEmail(ctx, username)
 	if err != nil {
 		runHasher(password)
 		return nil, false, err
 	}
+
+	if !creds.VerifyPassword([]byte(password)) {
+		return nil, false, errInvalidCredential
+	}
+
+	// user credential passed, get the user
+	usr, err := pswd.users.GetUserByID(ctx, creds.UserID)
+	if err != nil {
+		return nil, false, err
+	}
+
 	if !usr.IsActive() {
 		var msg string
 		if usr.Status == model.UserStatus_INACTIVE {
@@ -48,15 +59,10 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 		return nil, false, errors.New(msg)
 	}
 
-	if !usr.VerifyPassword([]byte(password)) {
-		return nil, false, errInvalidCredential
-	}
-
-	credentials := usr.Credentials
-	credentials.LastSignin = time.Now().UTC()
+	creds.LastSignin = time.Now().UTC()
 
 	// update last login
-	err = pswd.users.UpdateUserCredentials(context.Background(), usr.ID, credentials)
+	err = pswd.users.PutUserCredential(context.Background(), usr.ID, creds)
 	if err != nil {
 		return nil, false, err
 	}

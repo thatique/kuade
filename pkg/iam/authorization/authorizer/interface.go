@@ -13,6 +13,7 @@ type Args struct {
 	User   user.Info
 	Action Action
 	ARN    arn.ARN
+	IsOwner bool
 	// the specific metadata
 	Metadata map[string][]string
 }

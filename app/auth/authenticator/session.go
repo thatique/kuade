@@ -5,30 +5,34 @@ import (
 	"net/http"
 
 	"github.com/syaiful6/sersan"
-	v1 "github.com/thatique/kuade/api/v1"
 	"github.com/thatique/kuade/app/model"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/pkg/iam/auth/authenticator"
 )
 
 const (
+	// UserSessionKey is key used to store user id in session
 	UserSessionKey = "_userid_"
 )
 
 var (
-	UserSessionDoesnotExist = errors.New("auth: no user in session")
-	InvalidUserSessionId    = errors.New("auth: invalid user session id")
+	// ErrUserSessionDoesnotExist whenever we can't find an user in session
+	ErrUserSessionDoesnotExist = errors.New("auth: no user in session")
+	// ErrInvalidUserSessionID is thrown when we detect invalid user id
+	ErrInvalidUserSessionID = errors.New("auth: invalid user session id")
 )
 
+// Session is authenticator
 type Session struct {
-	users storage.UserStorage
+	users *storage.UserStorage
 }
 
-func NewSessionAuthenticator(store storage.UserStorage) *Session {
+// NewSessionAuthenticator create user
+func NewSessionAuthenticator(store *storage.UserStorage) *Session {
 	return &Session{users: store}
 }
 
-// login user to application and store it in session until it expired
+// Login login user to application and store it in session until it expired
 func Login(r *http.Request, u *model.User) error {
 	if u == nil {
 		return errors.New("user passed to login can't be nil user")
@@ -42,7 +46,7 @@ func Login(r *http.Request, u *model.User) error {
 	return nil
 }
 
-// logout user from application, remove userInfoContext if it can
+// Logout logout user from application, remove userInfoContext if it can
 func Logout(r *http.Request) error {
 	session, err := sersan.GetSession(r)
 	if err != nil {
@@ -54,6 +58,7 @@ func Logout(r *http.Request) error {
 	return nil
 }
 
+// AuthenticateRequest authenticate user by request information
 func (sess *Session) AuthenticateRequest(r *http.Request) (*authenticator.Response, bool, error) {
 	user, err := sess.loadUserFromSession(r)
 	if err != nil {
@@ -96,19 +101,19 @@ func (sess *Session) loadUserFromSession(r *http.Request) (*model.User, error) {
 	)
 
 	if suid, ok = sessionMap[UserSessionKey]; !ok {
-		return nil, UserSessionDoesnotExist
+		return nil, ErrUserSessionDoesnotExist
 	}
 
 	if uid, ok = suid.(string); !ok {
-		return nil, InvalidUserSessionId
+		return nil, ErrInvalidUserSessionID
 	}
 
-	objectid, err := v1.ObjectIDFromHex(uid)
+	objectid, err := model.NewIDFromString(uid)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := sess.users.FindUserById(r.Context(), objectid)
+	user, err := sess.users.GetUserByID(r.Context(), objectid)
 	if err != nil {
 		return nil, err
 	}
