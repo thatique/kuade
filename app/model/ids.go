@@ -4,13 +4,72 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
+	"math/rand"
 	"strconv"
+	"sync/atomic"
+	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
 )
 
+var (
+	machineID uint64
+	state     uint64
+)
+
+const (
+	epoch        = 1491696000000
+	serverBits   = 10
+	sequenceBits = 12
+	timeBits     = 42
+	serverShift  = sequenceBits
+	timeShift    = sequenceBits + serverBits
+	serverMax    = ^(-1 << serverBits)
+	sequenceMask = ^(-1 << sequenceBits)
+	timeMask     = ^(-1 << timeBits)
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+	machineID = uint64(rand.Intn(1023) << serverShift)
+}
+
 // ID is identifier for unique identifier
 type ID uint64
+
+// NewID Generate ID using Snowflake
+func NewID() ID {
+	// local state
+	var st uint64
+	for i := 0; i < 100; i++ {
+		t := (now() - epoch) & timeMask
+		current := atomic.LoadUint64(&state)
+		currentTime := current >> timeShift & timeMask
+		currentSeq := current & sequenceMask
+
+		switch {
+		case t > currentTime:
+			st = t << timeShift
+
+		case currentSeq == sequenceMask:
+			st = (currentTime + 1) << timeShift
+
+		default:
+			st = current + 1
+		}
+		if atomic.CompareAndSwapUint64(&state, current, st) {
+			break
+		}
+
+		st = 0
+	}
+
+	if st == 0 {
+		st = atomic.AddUint64(&state, 1)
+	}
+
+	return ID(st | machineID)
+}
 
 // NewIDFromString create ID from string
 func NewIDFromString(s string) (ID, error) {
@@ -25,7 +84,7 @@ func NewIDFromString(s string) (ID, error) {
 }
 
 func (id ID) String() string {
-	return fmt.Sprintf("%x", uint64(s))
+	return fmt.Sprintf("%x", uint64(id))
 }
 
 // Base63 return Base32 representation of this ID
@@ -123,3 +182,5 @@ func encode(s *[11]byte, n uint64) {
 	s[1], n = digits[n&0x3f], n>>6
 	s[0] = digits[n&0x3f]
 }
+
+func now() uint64 { return uint64(time.Now().UnixNano() / 1e6) }

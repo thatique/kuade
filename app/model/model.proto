@@ -104,3 +104,21 @@ message Credentials {
         (gogoproto.nullable) = false
     ];
 }
+
+// listing user
+message ListUserOptions {
+    // Filter user for this given role
+    UserRole   role   = 1;
+    UserStatus status = 2;
+    int64 page_size   = 3;
+    bytes page_token  = 4;
+}
+
+message ListPageUser {
+    // The returned users that satisfy ListUserOptions
+    repeated User users = 1;
+    // next_page_token left empty unless there are more objects
+    // to return. The value may be returned as ListUserOptions.page_token on a
+    // subsequent ListUser call, to fetch the next page of results.
+    bytes next_page_token = 2;
+}

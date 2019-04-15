@@ -21,7 +21,7 @@ func (creds *Credentials) VerifyPassword(pswd []byte) bool {
 		return false
 	}
 
-	if err := bcrypt.CompareHashAndPassword(u.Password, pswd); err != nil {
+	if err := bcrypt.CompareHashAndPassword(creds.Password, pswd); err != nil {
 		return false
 	}
 

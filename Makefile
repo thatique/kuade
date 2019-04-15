@@ -29,7 +29,7 @@ PROTO_INCLUDES := \
 	-I $(GOPATH)/src/github.com/gogo/protobuf
 
 PROTO_GOGO_MAPPINGS := $(shell echo \
-		Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/protobuf/google/protobuf, \
+		Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types, \
 		Mkuade.app.model=github.com/thatique/kuade/app/model \
 	| sed 's/ //g')
 
