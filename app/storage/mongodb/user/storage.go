@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 
+	"github.com/thatique/kuade/pkg/kerr"
+
 	"github.com/thatique/kuade/app/model"
 	"github.com/thatique/kuade/app/storage/driver"
 	"github.com/thatique/kuade/app/storage/mongodb/core"
@@ -30,14 +32,6 @@ func (s *userStorage) PutUser(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-func (s *userStorage) PutUserProfile(ctx context.Context, id model.ID, profile *model.UserProfile) error {
-	_, err := s.c.C(&dbUser{}).UpdateOne(ctx,
-		bson.M{"_id": id},
-		bson.M{"$set": bson.M{"profile": fromUserProfileDomain(profile)}},
-	)
-	return err
-}
-
 func (s *userStorage) PutUserCredential(ctx context.Context, id model.ID, cred *model.Credentials) error {
 	credentials := &dbCredentials{
 		Passwords:  cred.Password,
@@ -45,7 +39,7 @@ func (s *userStorage) PutUserCredential(ctx context.Context, id model.ID, cred *
 		CreatedAt:  cred.CreatedAt,
 		LastSignin: cred.LastSignin,
 	}
-	_, err := s.c.C(&dbUser{}).UpdateOne(ctx, bson.M{"_id": id},
+	_, err := s.c.C(&dbUser{}).UpdateOne(ctx, bson.M{"_id": int64(id)},
 		bson.M{"$set": bson.M{"credentials": credentials}})
 	return err
 }
@@ -69,7 +63,6 @@ func (s *userStorage) FindOrCreateUserForProvider(ctx context.Context, userdata 
 	err = s.c.C(usr).FindOneAndUpdate(ctx, userQuery, bson.M{"$setOnInsert": usr}, upsertOpts()).Decode(&usr2)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			usr.ID = usr2.ID
 			return true, usr.toUserModel(), nil
 		}
 		return false, nil, err
@@ -90,11 +83,40 @@ func (s *userStorage) GetCredentialByEmail(ctx context.Context, email string) (*
 	return &model.Credentials{
 		Email:      email,
 		Password:   usr.Credentials.Passwords,
-		UserID:     usr.ID,
+		UserID:     model.ID(usr.ID),
 		Enabled:    usr.Credentials.Enabled,
 		CreatedAt:  usr.Credentials.CreatedAt,
 		LastSignin: usr.Credentials.LastSignin,
 	}, nil
+}
+
+func (s *userStorage) GetUserByID(ctx context.Context, id model.ID) (*model.User, error) {
+	var usr *dbUser
+	err := s.c.C(usr).FindOne(ctx, bson.M{"_id": int64(id)}).Decode(&usr)
+	if err != nil {
+		return nil, err
+	}
+	return usr.toUserModel(), nil
+}
+
+func (s *userStorage) GetUserBySlug(ctx context.Context, slug string) (*model.User, error) {
+	var usr *dbUser
+	err := s.c.C(usr).FindOne(ctx, bson.M{"slug": slug}).Decode(&usr)
+	if err != nil {
+		return nil, err
+	}
+	return usr.toUserModel(), nil
+}
+
+func (s *userStorage) ErrorCode(err error) kerr.ErrorCode {
+	if err == mongo.ErrNoDocuments {
+		return kerr.NotFound
+	}
+	if err == mongo.ErrNilDocument || err == mongo.ErrEmptySlice {
+		return kerr.InvalidArgument
+	}
+
+	return kerr.Unknown
 }
 
 func upsertOpts() *options.FindOneAndUpdateOptions {

@@ -30,6 +30,12 @@ enum UserRole {
     SUPERUSER  = 3;
 }
 
+enum BudgetLevel {
+    LOW = 0;
+    MEDIUM = 1;
+    HIGH = 2;
+}
+
 message PasswordChangeToken {
     string token      = 1;
     string email      = 2;
@@ -50,6 +56,15 @@ message Rectangle {
     Point hi = 2 [(gogoproto.nullable) = false];
 }
 
+message Address {
+    string address  = 1;
+    string address2 = 2;
+    string city     = 3;
+    string state    = 4;
+    string zipcode  = 5;
+    Point point     = 6;
+}
+
 message User {
     bytes id = 1 [
         (gogoproto.nullable) = false,
@@ -61,9 +76,16 @@ message User {
     string name  = 3;
     // email must be unique
     string email = 4;
-    UserRole role = 5;
-    UserStatus status = 6;
-    google.protobuf.Timestamp created_at = 7 [
+    string icon  = 5;
+    UserRole role = 6;
+    UserStatus status = 7;
+    string bio = 8;
+    int32 age = 9;
+    Address address = 10 [(gogoproto.nullable) = false];
+    // vendor specific fields
+    string category = 11;
+    BudgetLevel budget = 12;
+    google.protobuf.Timestamp created_at = 13 [
         (gogoproto.stdtime) = true,
         (gogoproto.nullable) = false
     ];
@@ -72,18 +94,6 @@ message User {
 message OauthProvider {
     string name = 1;
     string key  = 2;
-}
-
-message UserProfile {
-    string icon = 1;
-    string bio  = 2;
-    int32 age   = 3;
-
-    string address = 4;
-    string city    = 5;
-    string state   = 6;
-    string zipcode = 7;
-    Point point    = 8;
 }
 
 message Credentials {
@@ -103,22 +113,4 @@ message Credentials {
         (gogoproto.stdtime) = true,
         (gogoproto.nullable) = false
     ];
-}
-
-// listing user
-message ListUserOptions {
-    // Filter user for this given role
-    UserRole   role   = 1;
-    UserStatus status = 2;
-    int64 page_size   = 3;
-    bytes page_token  = 4;
-}
-
-message ListPageUser {
-    // The returned users that satisfy ListUserOptions
-    repeated User users = 1;
-    // next_page_token left empty unless there are more objects
-    // to return. The value may be returned as ListUserOptions.page_token on a
-    // subsequent ListUser call, to fetch the next page of results.
-    bytes next_page_token = 2;
 }
