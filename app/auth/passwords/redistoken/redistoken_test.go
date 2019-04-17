@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/thatique/kuade/api/v1"
 	"github.com/thatique/kuade/app/model"
 )
 
@@ -98,7 +97,7 @@ func TestGenerateValidLast(t *testing.T) {
 func TestDeletedTokenShouldInvalid(t *testing.T) {
 	gen := New(createRedisPool())
 	user := &model.User{
-		ID:    v1.NewObjectID(),
+		ID:    model.NewID(),
 		Email: "foo@example.com",
 		Credentials: model.Credentials{
 			Enabled:    true,

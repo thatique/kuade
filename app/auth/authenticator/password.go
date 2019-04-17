@@ -19,12 +19,12 @@ var (
 var _ authenticator.Password = &passwordAuthenticator{}
 
 type passwordAuthenticator struct {
-	users storage.UserStorage
+	users *storage.UserStore
 }
 
-func runHasher(pswd string) {
-	var usr *model.Credentials
-	usr.SetPassword([]byte(pswd))
+// NewPasswordAuthenticator create a `authenticator.Password`
+func NewPasswordAuthenticator(users *storage.UserStore) authenticator.Password {
+	return &passwordAuthenticator{users: users}
 }
 
 func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, username, password string) (*authenticator.Response, bool, error) {
@@ -32,7 +32,7 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 		return nil, false, errExpectedEmail
 	}
 
-	creds, err = pswd.users.GetCredentialByEmail(ctx, username)
+	creds, err := pswd.users.GetCredentialByEmail(ctx, username)
 	if err != nil {
 		runHasher(password)
 		return nil, false, err
@@ -68,4 +68,9 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 	}
 
 	return &authenticator.Response{User: usr.ToAuthInfo()}, true, nil
+}
+
+func runHasher(pswd string) {
+	var usr *model.Credentials
+	usr.SetPassword([]byte(pswd))
 }

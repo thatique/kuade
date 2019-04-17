@@ -9,5 +9,5 @@ type Driver interface {
 	config.Configurable
 
 	// GetUserStorage
-	GetUserStorage() (UserStore, error)
+	GetUserStore() (UserStore, error)
 }

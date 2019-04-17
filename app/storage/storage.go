@@ -20,34 +20,34 @@ var (
 	OpenCensusViews = metrics.Views(pkgName, latencyMeasure)
 )
 
-// Storage wrapped storage driver with useful metric
-type Storage struct {
+// Store wrapped Store driver with useful metric
+type Store struct {
 	driver driver.Driver
 
-	user *UserStorage
+	user *UserStore
 }
 
 // New create storage
-func New(driver driver.Driver) *Storage {
-	return &Storage{driver: driver}
+func New(driver driver.Driver) *Store {
+	return &Store{driver: driver}
 }
 
 // GetUserStorage get wrapped user storage
-func (s *Storage) GetUserStorage() (*UserStorage, error) {
+func (s *Store) GetUserStorage() (*UserStore, error) {
 	if s.user != nil {
 		return s.user, nil
 	}
-	us, err := s.driver.GetUserStorage()
+	us, err := s.driver.GetUserStore()
 	if err != nil {
 		return nil, err
 	}
-	s.user = NewUserStorage(us)
+	s.user = NewUserStore(us)
 	return s.user, nil
 }
 
 // URLOpener can create Storage based URL
 type URLOpener interface {
-	OpenStorageURL(ctx context.Context, u *url.URL) (*Storage, error)
+	OpenStorageURL(ctx context.Context, u *url.URL) (*Store, error)
 }
 
 // URLMux is store registered storage driver
@@ -61,22 +61,22 @@ func (mux *URLMux) RegisterStorage(scheme string, opener URLOpener) {
 }
 
 // OpenStorage open storage based URL string
-func (mux *URLMux) OpenStorage(ctx context.Context, urlstr string) (*Storage, error) {
+func (mux *URLMux) OpenStorage(ctx context.Context, urlstr string) (*Store, error) {
 	opener, u, err := mux.schemes.FromString("Storage", urlstr)
 	if err != nil {
 		return nil, err
 	}
-	return opener.(URLOpener).OpenTransportURL(ctx, u)
+	return opener.(URLOpener).OpenStorageURL(ctx, u)
 }
 
 // OpenStorageURL dispatches the URL to the opener that is registered with the
 // URL's scheme. OpenTransportURL is safe to call from multiple goroutines.
-func (mux *URLMux) OpenStorageURL(ctx context.Context, u *url.URL) (*Storage, error) {
+func (mux *URLMux) OpenStorageURL(ctx context.Context, u *url.URL) (*Store, error) {
 	opener, err := mux.schemes.FromURL("Storage", u)
 	if err != nil {
 		return nil, err
 	}
-	return opener.(URLOpener).OpenTransportURL(ctx, u)
+	return opener.(URLOpener).OpenStorageURL(ctx, u)
 }
 
 var defaultURLMux = new(URLMux)
@@ -91,6 +91,6 @@ func DefaultURLMux() *URLMux {
 // OpenStorage opens the Keeper identified by the URL given.
 // See the URLOpener documentation in provider-specific subpackages for
 // details on supported URL formats
-func OpenStorage(ctx context.Context, urlstr string) (*Transport, error) {
+func OpenStorage(ctx context.Context, urlstr string) (*Store, error) {
 	return defaultURLMux.OpenStorage(ctx, urlstr)
 }

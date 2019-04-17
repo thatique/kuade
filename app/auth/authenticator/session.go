@@ -24,11 +24,11 @@ var (
 
 // Session is authenticator
 type Session struct {
-	users *storage.UserStorage
+	users *storage.UserStore
 }
 
 // NewSessionAuthenticator create user
-func NewSessionAuthenticator(store *storage.UserStorage) *Session {
+func NewSessionAuthenticator(store *storage.UserStore) *Session {
 	return &Session{users: store}
 }
 
@@ -62,7 +62,7 @@ func Logout(r *http.Request) error {
 func (sess *Session) AuthenticateRequest(r *http.Request) (*authenticator.Response, bool, error) {
 	user, err := sess.loadUserFromSession(r)
 	if err != nil {
-		if err == UserSessionDoesnotExist {
+		if err == ErrUserSessionDoesnotExist {
 			session, err := sersan.GetSession(r)
 			if err == nil {
 				delete(session, UserSessionKey)
@@ -84,7 +84,7 @@ func updateSession(r *http.Request, u *model.User) error {
 		return err
 	}
 
-	sessionMap[UserSessionKey] = u.ID.Hex()
+	sessionMap[UserSessionKey] = u.ID.String()
 	return nil
 }
 

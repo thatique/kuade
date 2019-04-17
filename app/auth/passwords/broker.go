@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/emersion/go-message"
-	"github.com/thatique/kuade/api/v1"
 	"github.com/thatique/kuade/app/model"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/pkg/emailparser"
@@ -20,26 +19,34 @@ import (
 	"github.com/thatique/kuade/pkg/queue"
 )
 
+// ErrInvalidEmail
 var ErrInvalidEmail = errors.New("passwords: invalid email")
 
+// ErrorCode is error code returned in this package to indicate error that expected
+// handled by application
 type ErrorCode int32
 
 const (
+	// NoError indicate no error
 	NoError ErrorCode = iota
+
+	// ErrPassNotMatch returned if password and password confirmation not match
 	ErrPassNotMatch
-	ErrMinimumStaffPassLen
+
+	// ErrMinimumPassword returned if password length need
 	ErrMinimumPassword
+
+	// Error returned because upstream error
 	ErrUpstream
 )
 
+// ErrorDescription returns the string representation of error code
 func (code ErrorCode) ErrorDescription() string {
 	switch code {
 	case NoError:
 		return "No Error"
 	case ErrPassNotMatch:
 		return "password and password confirmation not match"
-	case ErrMinimumStaffPassLen:
-		return "minimum password length for staff user is 15 chars"
 	case ErrMinimumPassword:
 		return "minimum password length is 8 chars"
 	default:
@@ -47,17 +54,21 @@ func (code ErrorCode) ErrorDescription() string {
 	}
 }
 
+// Broker is password broker
 type Broker struct {
-	Sender, ResetURL, TemplatePath string
-	Asset                          func(string) ([]byte, error)
+	Sender, ResetURL string
 
-	users     storage.UserStorage
+	HTML *htemplate.Template
+	Text template.Template
+
+	users     *storage.UserStore
 	token     TokenGenerator
 	transport *mailer.Transport
 	queue     *queue.Queue
 }
 
-func NewBroker(users storage.UserStorage, token TokenGenerator, m *mailer.Transport, q *queue.Queue) *Broker {
+// NewBroker generate broker instace
+func NewBroker(users *storage.UserStore, token TokenGenerator, m *mailer.Transport, q *queue.Queue) *Broker {
 	return &Broker{
 		users:     users,
 		token:     token,

@@ -70,11 +70,28 @@ func (s *userStorage) FindOrCreateUserForProvider(ctx context.Context, userdata 
 	return false, usr.toUserModel(), nil
 }
 
+func (s *userStorage) IsEmailAlreadyInUse(ctx context.Context, email string) (bool, model.ID, error) {
+	var usr *dbUser
+	err := s.c.C(usr).FindOne(ctx,
+		bson.M{"email": email},
+		options.FindOne().SetProjection(bson.M{"_id": 1}),
+	).Decode(&usr)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return true, model.ID(0), nil
+		}
+		// unexpected error
+		return false, model.ID(0), err
+	}
+
+	return true, model.ID(usr.ID), nil
+}
+
 func (s *userStorage) GetCredentialByEmail(ctx context.Context, email string) (*model.Credentials, error) {
 	var usr *dbUser
 	err := s.c.C(usr).FindOne(ctx,
 		bson.M{"email": email},
-		options.FindOne().SetProjection(bson.D{{"_id": 1}, {"credentials": 1}}),
+		options.FindOne().SetProjection(bson.M{"_id": 1, "credentials": 1}),
 	).Decode(&usr)
 	if err != nil {
 		return nil, err

@@ -66,7 +66,7 @@ func (gen *RedisTokenGenerator) Generate(user *model.User) (token string, err er
 		return "", err
 	}
 
-	_, err = insertScript.Do(conn, gen.keyPrefix+user.ID.Hex(), gen.keyPrefix+token, gen.Expire, data)
+	_, err = insertScript.Do(conn, gen.keyPrefix+user.ID.String(), gen.keyPrefix+token, gen.Expire, data)
 	return token, err
 }
 
