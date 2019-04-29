@@ -1,10 +1,12 @@
 package cassandra
 
 import (
+	"context"
+
 	"github.com/gocql/gocql"
 
-	"github.com/thatique/app/store/cassandra/dbmodels"
 	"github.com/thatique/kuade/app/model"
+	"github.com/thatique/kuade/app/storage/cassandra/dbmodels"
 	"github.com/thatique/kuade/pkg/kerr"
 )
 
@@ -33,39 +35,38 @@ type userStore struct {
 
 func (s *userStore) PutUser(ctx context.Context, user *model.User) error {
 	usr := dbmodels.FromDomainUser(user)
-	if err := s.putUser(ctx, usr); err != nil {
-		return err
-	}
-	if err := s.putUserSlug(ctx, usr); err != nil {
-		return err
-	}
-	return nil
+	batch := s.session.NewBatch(gocql.UnloggedBatch).WithContext(ctx)
+	s.putUser(batch, usr)
+	return s.session.ExecuteBatch(batch)
 }
 
 func (s *userStore) PutUserCredential(ctx context.Context, id model.ID, creds *model.Credentials) error {
 	dbCreds := dbmodels.FromDomainUserCredential(id, creds)
-	query := s.session.Query(insertUserCreds, dbCreds.Email, dbCreds.UserID, dbCreds.Passwords,
+	query := s.session.Query(insertUserCredential, dbCreds.Email, dbCreds.UserID, dbCreds.Password,
 		dbCreds.Enabled, dbCreds.CreatedAt, dbCreds.LastSignin).WithContext(ctx)
 	return query.Exec()
 }
 
 func (s *userStore) FindOrCreateUserForProvider(ctx context.Context, userData *model.User, provider model.OauthProvider) (newUser bool, user *model.User, err error) {
-	var userId int64
-	if err := s.session.Query(queryUserByProvider, provider.Name, provider.Key).WithContext(ctx).Scan(&userId); err != nil {
+	var userID int64
+	if err := s.session.Query(queryUserByProvider, provider.Name, provider.Key).WithContext(ctx).Scan(&userID); err != nil {
 		if err != gocql.ErrNotFound {
 			return false, nil, err
 		}
 		// insert it
-		if err = s.PutUser(ctx, userData); err != nil {
-			return false, nil, err
-		}
-
-		if err = s.session.Query(insertUserProvider, provider.Name, provider.Key, int64(userData.ID)).WithContext(ctx).Exec(); err != nil {
+		batch := s.session.NewBatch(gocql.UnloggedBatch).WithContext(ctx)
+		s.putUser(batch, dbmodels.FromDomainUser(userData))
+		batch.Query(insertUserProvider, provider.Name, provider.Key, int64(userData.ID))
+		if err = s.session.ExecuteBatch(batch); err != nil {
 			return false, nil, err
 		}
 		return true, userData, nil
 	}
-	return s.getUserById(ctx, userId)
+	dbuser, err := s.getUserByID(ctx, userID)
+	if err != nil {
+		return false, nil, err
+	}
+	return false, dbuser.ToDomain(), nil
 }
 
 func (s *userStore) IsEmailAlreadyInUse(ctx context.Context, email string) (bool, model.ID, error) {
@@ -79,7 +80,7 @@ func (s *userStore) IsEmailAlreadyInUse(ctx context.Context, email string) (bool
 	return true, model.ID(creds.UserID), nil
 }
 
-func (s *userStorage) GetCredentialByEmail(ctx context.Context, email string) (*model.Credentials, error) {
+func (s *userStore) GetCredentialByEmail(ctx context.Context, email string) (*model.Credentials, error) {
 	creds, err := s.getUserCredential(ctx, email)
 	if err != nil {
 		return nil, err
@@ -88,7 +89,7 @@ func (s *userStorage) GetCredentialByEmail(ctx context.Context, email string) (*
 }
 
 func (s *userStore) GetUserByID(ctx context.Context, id model.ID) (*model.User, error) {
-	user, err := s.getUserById(ctx, id)
+	user, err := s.getUserByID(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +97,7 @@ func (s *userStore) GetUserByID(ctx context.Context, id model.ID) (*model.User, 
 }
 
 func (s *userStore) GetUserBySlug(ctx context.Context, slug string) (*model.User, error) {
-	usr = &dbmodels.User{}
+	usr := &dbmodels.User{}
 	if err := s.session.Query(queryUserBySlug, slug).WithContext(ctx).Scan(
 		&usr.ID,
 		&usr.Slug,
@@ -117,7 +118,7 @@ func (s *userStore) GetUserBySlug(ctx context.Context, slug string) (*model.User
 	return usr.ToDomain(), nil
 }
 
-func (s *userStorage) ErrorCode(err error) kerr.ErrorCode {
+func (s *userStore) ErrorCode(err error) kerr.ErrorCode {
 	if err == gocql.ErrNotFound {
 		return kerr.NotFound
 	}
@@ -129,7 +130,7 @@ func (s *userStore) getUserCredential(ctx context.Context, email string) (*dbmod
 	creds := &dbmodels.Credentials{Email: email}
 	if err := s.session.Query(queryUserCredentialByEmail, email).WithContext(ctx).Scan(
 		&creds.UserID,
-		&creds.Passwords,
+		&creds.Password,
 		&creds.Enabled,
 		&creds.CreatedAt,
 		&creds.LastSignin,
@@ -139,21 +140,24 @@ func (s *userStore) getUserCredential(ctx context.Context, email string) (*dbmod
 	return creds, nil
 }
 
-func (s *userStore) putUser(ctx context.Context, usr *dbmodels.User) error {
-	query := s.session.Query(insertUser, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
-		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt).WithContext(ctx)
-	return query.Exec()
+func (s *userStore) putUser(batch *gocql.Batch, user *dbmodels.User) {
+	s.putUserByID(batch, user)
+	s.putUserBySlug(batch, user)
 }
 
-func (s *userStore) putUserSlug(ctx context.Context, usr *dbmodels.User) error {
-	query := s.session.Query(insertUserSlug, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
-		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt).WithContext(ctx)
-	return query.Exec()
+func (s *userStore) putUserByID(batch *gocql.Batch, usr *dbmodels.User) {
+	batch.Query(insertUser, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
+		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt)
 }
 
-func (s *userStore) getUserById(ctx context.Context, id int64) (user *dbmodels.User, err error) {
-	usr = &dbmodels.User{}
-	if err := s.session.Query(queryUserByID, userId).WithContext(ctx).Scan(
+func (s *userStore) putUserBySlug(batch *gocql.Batch, usr *dbmodels.User) {
+	batch.Query(insertUserSlug, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
+		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt)
+}
+
+func (s *userStore) getUserByID(ctx context.Context, id int64) (user *dbmodels.User, err error) {
+	usr := &dbmodels.User{}
+	if err := s.session.Query(queryUserByID, id).WithContext(ctx).Scan(
 		&usr.ID,
 		&usr.Slug,
 		&usr.Name,

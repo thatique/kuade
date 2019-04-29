@@ -1,7 +1,9 @@
 package dbmodels
 
 import (
-	"github.com/thatique/app/model"
+	"time"
+
+	"github.com/thatique/kuade/app/model"
 )
 
 type User struct {
@@ -23,7 +25,7 @@ type User struct {
 type Credentials struct {
 	Email      string
 	UserID     int64
-	Passwords  []byte
+	Password   []byte
 	Enabled    bool
 	CreatedAt  time.Time
 	LastSignin time.Time
@@ -67,7 +69,7 @@ func FromDomainUserCredential(id model.ID, creds *model.Credentials) *Credential
 	return &Credentials{
 		UserID:     int64(id),
 		Email:      creds.GetEmail(),
-		Passwords:  creds.GetPassword(),
+		Password:   creds.GetPassword(),
 		Enabled:    creds.GetEnabled(),
 		CreatedAt:  creds.GetCreatedAt(),
 		LastSignin: creds.GetLastSignin(),
@@ -78,7 +80,7 @@ func (creds *Credentials) ToDomain() *model.Credentials {
 	return &model.Credentials{
 		UserID:     model.ID(creds.UserID),
 		Email:      creds.Email,
-		Passwords:  creds.Password,
+		Password:   creds.Password,
 		Enabled:    creds.Enabled,
 		CreatedAt:  creds.CreatedAt,
 		LastSignin: creds.LastSignin,

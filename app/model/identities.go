@@ -1,9 +1,5 @@
 package model
 
-import (
-	"github.com/thatique/kuade/pkg/iam/auth/user"
-)
-
 // IsActive check if the user status currently active
 func (m *User) IsActive() bool {
 	return m.GetStatus() == UserStatus_ACTIVE
@@ -21,7 +17,7 @@ func (m *User) GetGroups() []string {
 	return []string{m.GetRole().String()}
 }
 
-func (m *User) GetMetadata() {
+func (m *User) GetMetadata() map[string][]string {
 	metadata := make(map[string][]string)
 	return metadata
 }

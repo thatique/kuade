@@ -1,11 +1,10 @@
 package dbmodels
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/gocql/gocql"
-	"github.com/thatique/app/model"
+	"github.com/thatique/kuade/app/model"
 )
 
 type Address struct {
@@ -18,10 +17,7 @@ type Address struct {
 	Lon      float64 `cql:"lon"`
 }
 
-func FromDomainAddress(address *model.Address) *Address {
-	if address == nil {
-		return &Address{}
-	}
+func FromDomainAddress(address model.Address) *Address {
 	addr := &Address{
 		Address:  address.Address,
 		Address2: address.Address2,
@@ -36,19 +32,16 @@ func FromDomainAddress(address *model.Address) *Address {
 	return addr
 }
 
-func (a *Address) ToDomain() *model.Address {
-	if address == nil {
-		return *model.Address{}
-	}
-	return &Address{
-		Address:  address.Address,
-		Address2: address.Address2,
-		City:     address.City,
-		State:    address.State,
-		Zipcode:  address.Zipcode,
+func (a *Address) ToDomain() model.Address {
+	return model.Address{
+		Address:  a.Address,
+		Address2: a.Address2,
+		City:     a.City,
+		State:    a.State,
+		Zipcode:  a.Zipcode,
 		Point: &model.Point{
-			Latitude:  address.Lat,
-			Longitude: address.Lon,
+			Latitude:  a.Lat,
+			Longitude: a.Lon,
 		},
 	}
 }
@@ -67,7 +60,7 @@ func (a *Address) MarshalUDT(name string, info gocql.TypeInfo) ([]byte, error) {
 		return gocql.Marshal(info, a.Zipcode)
 	case "lat":
 		return gocql.Marshal(info, a.Lat)
-	case "lat":
+	case "lon":
 		return gocql.Marshal(info, a.Lon)
 	default:
 		return nil, fmt.Errorf("unknown column for position: %q", name)
@@ -89,9 +82,9 @@ func (a *Address) UnmarshalUDT(name string, info gocql.TypeInfo, data []byte) er
 		return gocql.Unmarshal(info, data, &a.Zipcode)
 	case "lat":
 		return gocql.Unmarshal(info, data, &a.Lat)
-	case "lat":
+	case "lon":
 		return gocql.Unmarshal(info, data, &a.Lon)
 	default:
-		return nil, fmt.Errorf("unknown column for position: %q", name)
+		return fmt.Errorf("unknown column for position: %q", name)
 	}
 }
