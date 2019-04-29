@@ -9,11 +9,19 @@ func (m *User) IsActive() bool {
 	return m.GetStatus() == UserStatus_ACTIVE
 }
 
-// ToAuthInfo convert user model to user.Info
-func (m *User) ToAuthInfo() user.Info {
-	return &user.DefaultInfo{
-		Name:   m.GetEmail(),
-		UID:    m.ID.String(),
-		Groups: []string{m.GetRole().String()},
-	}
+func (m *User) GetUserName() string {
+	return m.GetEmail()
+}
+
+func (m *User) GetUID() string {
+	return m.GetUID()
+}
+
+func (m *User) GetGroups() []string {
+	return []string{m.GetRole().String()}
+}
+
+func (m *User) GetMetadata() {
+	metadata := make(map[string][]string)
+	return metadata
 }

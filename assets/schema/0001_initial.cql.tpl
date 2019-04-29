@@ -4,18 +4,14 @@
 --
 CREATE KEYSPACE IF NOT EXISTS ${keyspace} WITH replication = ${replication};
 
-CREATE TYPE IF NOT EXISTS ${keyspace}.geo_point {
-  latitude double,
-  longitude doube,
-}
-
 CREATE TYPE IF NOT EXISTS ${keyspace}.address {
   address  text,
   address2 text,
   city     text,
   state    text,
   zipcode  text,
-  point    geo_point,
+  lat      double,
+  lon      double,
 }
 
 -- table for users
@@ -63,6 +59,14 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.user_credentials (
   last_signin  timestamp,
 
   PRIMARY KEY (email)
+);
+
+CREATE TABLE IF NOT EXISTS ${keyspace}.user_providers (
+  name text,
+  key  text,
+  user_id bigint,
+
+  PRIMARY KEY (name, key)
 );
 
 -- table to store user's session using sersan lib

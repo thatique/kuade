@@ -72,7 +72,7 @@ func (sess *Session) AuthenticateRequest(r *http.Request) (*authenticator.Respon
 	}
 
 	response := &authenticator.Response{
-		User: user.ToAuthInfo(),
+		User: user,
 	}
 	return response, true, nil
 }

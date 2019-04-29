@@ -13,9 +13,9 @@ const (
 )
 
 type Info interface {
-	// GetName returns the name that uniquely identifies this user among all
+	// GetUserName returns the name that uniquely identifies this user among all
 	// other active users. This can be an email or username.
-	GetName() string
+	GetUserName() string
 
 	// GetUID returns a unique value for a particular user that will change
 	// if the user is removed from the system and another user is added with
@@ -41,7 +41,7 @@ type DefaultInfo struct {
 	Metadata map[string][]string
 }
 
-func (i *DefaultInfo) GetName() string {
+func (i *DefaultInfo) GetUserName() string {
 	return i.Name
 }
 

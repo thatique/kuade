@@ -10,9 +10,9 @@ type Action string
 
 // Args is argument to be passed to Authorizer
 type Args struct {
-	User   user.Info
-	Action Action
-	ARN    arn.ARN
+	User    user.Info
+	Action  Action
+	ARN     arn.ARN
 	IsOwner bool
 	// the specific metadata
 	Metadata map[string][]string

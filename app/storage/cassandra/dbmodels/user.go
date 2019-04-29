@@ -1,0 +1,86 @@
+package dbmodels
+
+import (
+	"github.com/thatique/app/model"
+)
+
+type User struct {
+	ID        int64
+	Slug      string
+	Name      string
+	Email     string
+	Icon      string
+	Role      int32
+	Status    int32
+	Bio       string
+	Age       int32
+	Address   *Address
+	Category  string
+	Budget    int32
+	CreatedAt time.Time
+}
+
+type Credentials struct {
+	Email      string
+	UserID     int64
+	Passwords  []byte
+	Enabled    bool
+	CreatedAt  time.Time
+	LastSignin time.Time
+}
+
+func FromDomainUser(user *model.User) *User {
+	return &User{
+		ID:        int64(user.ID),
+		Slug:      user.GetSlug(),
+		Name:      user.GetName(),
+		Email:     user.GetEmail(),
+		Role:      int32(user.GetRole()),
+		Status:    int32(user.GetStatus()),
+		Bio:       user.GetBio(),
+		Age:       user.GetAge(),
+		Address:   FromDomainAddress(user.GetAddress()),
+		Category:  user.Category,
+		Budget:    int32(user.Budget),
+		CreatedAt: user.GetCreatedAt(),
+	}
+}
+
+func (user *User) ToDomain() *model.User {
+	return &model.User{
+		ID:        model.ID(uint64(user.ID)),
+		Slug:      user.Slug,
+		Name:      user.Name,
+		Email:     user.Email,
+		Role:      model.UserRole(user.Role),
+		Status:    model.UserStatus(user.Status),
+		Bio:       user.Bio,
+		Age:       user.Age,
+		Address:   user.Address.ToDomain(),
+		Category:  user.Category,
+		Budget:    model.BudgetLevel(user.Budget),
+		CreatedAt: user.CreatedAt,
+	}
+}
+
+func FromDomainUserCredential(id model.ID, creds *model.Credentials) *Credentials {
+	return &Credentials{
+		UserID:     int64(id),
+		Email:      creds.GetEmail(),
+		Passwords:  creds.GetPassword(),
+		Enabled:    creds.GetEnabled(),
+		CreatedAt:  creds.GetCreatedAt(),
+		LastSignin: creds.GetLastSignin(),
+	}
+}
+
+func (creds *Credentials) ToDomain() *model.Credentials {
+	return &model.Credentials{
+		UserID:     model.ID(creds.UserID),
+		Email:      creds.Email,
+		Passwords:  creds.Password,
+		Enabled:    creds.Enabled,
+		CreatedAt:  creds.CreatedAt,
+		LastSignin: creds.LastSignin,
+	}
+}

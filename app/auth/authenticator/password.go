@@ -67,7 +67,7 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 		return nil, false, err
 	}
 
-	return &authenticator.Response{User: usr.ToAuthInfo()}, true, nil
+	return &authenticator.Response{User: usr}, true, nil
 }
 
 func runHasher(pswd string) {
