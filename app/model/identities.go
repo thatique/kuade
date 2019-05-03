@@ -6,7 +6,7 @@ func (m *User) IsActive() bool {
 }
 
 func (m *User) GetUserName() string {
-	return m.GetEmail()
+	return m.GetUsername()
 }
 
 func (m *User) GetUID() string {

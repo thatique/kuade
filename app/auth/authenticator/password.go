@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	errExpectedEmail     = errors.New("authenticator: expected an email")
-	errInvalidCredential = errors.New("authenticator: invalid credential")
+	errExpectedEmailOrUsername = errors.New("authenticator: expected an email or username")
+	errInvalidCredential       = errors.New("authenticator: invalid credential")
 )
 
 var _ authenticator.Password = &passwordAuthenticator{}
@@ -28,11 +28,18 @@ func NewPasswordAuthenticator(users *storage.UserStore) authenticator.Password {
 }
 
 func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, username, password string) (*authenticator.Response, bool, error) {
-	if username == "" || !emailparser.IsValidEmail(username) {
-		return nil, false, errExpectedEmail
+	if username == "" {
+		return nil, false, errExpectedEmailOrUsername
 	}
 
-	creds, err := pswd.users.GetCredentialByEmail(ctx, username)
+	var credsFunc func(context.Context, string) (*model.Credentials, error)
+	if emailparser.IsValidEmail(username) {
+		credsFunc := pswd.users.GetCredentialByEmail
+	} else {
+		credsFunc := pswd.users.GetCredentialByUsername
+	}
+
+	creds, err := credsFunc(ctx, username)
 	if err != nil {
 		runHasher(password)
 		return nil, false, err

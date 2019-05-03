@@ -75,12 +75,34 @@ func (s *UserStore) IsEmailAlreadyInUse(ctx context.Context, email string) (used
 	return
 }
 
+func (s *UserStore) IsUsernameAlreadyInUse(ctx context.Context, username string) (used bool, id model.ID, err error) {
+	ctx = s.tracer.Start(ctx, "IsUsernameAlreadyInUse")
+	defer func() { s.tracer.End(ctx, err) }()
+
+	used, id, err = s.store.IsUsernameAlreadyInUse(ctx, username)
+	if err != nil {
+		err = wrapUserStoreError(s.store, err)
+	}
+	return
+}
+
 // GetCredentialByEmail get user credential by email
 func (s *UserStore) GetCredentialByEmail(ctx context.Context, email string) (creds *model.Credentials, err error) {
 	ctx = s.tracer.Start(ctx, "GetCredentialByEmail")
 	defer func() { s.tracer.End(ctx, err) }()
 
 	creds, err = s.store.GetCredentialByEmail(ctx, email)
+	if err != nil {
+		err = wrapUserStoreError(s.store, err)
+	}
+	return
+}
+
+func (s *UserStore) GetCredentialByUsername(ctx context.Context, username string) (creds *model.Credentials, err error) {
+	ctx = s.tracer.Start(ctx, "GetCredentialByUsername")
+	defer func() { s.tracer.End(ctx, err) }()
+
+	creds, err = s.store.GetCredentialByUsername(ctx, email)
 	if err != nil {
 		err = wrapUserStoreError(s.store, err)
 	}

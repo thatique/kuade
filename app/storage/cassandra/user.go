@@ -11,20 +11,23 @@ import (
 )
 
 const (
-	insertUser = `INSERT INTO users(id, slug, name, email, icon, role, status, bio, age, address, category, budget, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	insertUserSlug = `INSERT INTO users_by_slug(id, slug, name, email, icon, role, status, bio, age, address, category, budget, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	insertUserCredential = `INSERT INTO user_credentials(email, user_id, password, enabled, created_at, last_signin)
-		VALUES (?, ?, ?, ?, ?, ?)`
+	insertUser = `INSERT INTO users(id, slug, name, email, username, icon, role, status, bio, age, address, category, budget, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	insertUserSlug = `INSERT INTO users_by_slug(id, slug, name, email, username, icon, role, status, bio, age, address, category, budget, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	insertUserCredential = `INSERT INTO user_credentials(email, username, user_id, password, enabled, created_at, last_signin)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`
+	insertUserCredentialByUsername = `INSERT INTO user_credentials_by_username(email, username, user_id, password, enabled, created_at, last_signin)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`
 	insertUserProvider = `INSERT INTO user_providers(name, key, user_id) VALUES (?, ?, ?)`
 
-	queryUserByProvider        = `SELECT user_id FROM user_providers WHERE name = ? AND key = ?`
-	queryUserCredentialByEmail = `SELECT user_id, password, enabled, created_at, last_signin FROM user_credentials WHERE email = ?`
-	queryUserByID              = `SELECT id, slug, name, email, icon, role, status, bio, age, address, category, budget, created_at
+	queryUserByProvider           = `SELECT user_id FROM user_providers WHERE name = ? AND key = ?`
+	queryUserCredentialByEmail    = `SELECT user_id, username, password, enabled, created_at, last_signin FROM user_credentials WHERE email = ?`
+	queryUserCredentialByUsername = `SELECT user_id, email, password, enabled, created_at, last_signin FROM user_credentials_by_username WHERE username = ?`
+	queryUserByID                 = `SELECT id, slug, name, email, username, icon, role, status, bio, age, address, category, budget, created_at
 		FROM users
 		WHERE id = ?`
-	queryUserBySlug = `SELECT id, slug, name, email, icon, role, status, bio, age, address, category, budget, created_at
+	queryUserBySlug = `SELECT id, slug, name, email, username, icon, role, status, bio, age, address, category, budget, created_at
 		FROM users_by_slug
 		WHERE slug = ?`
 )
@@ -35,16 +38,21 @@ type userStore struct {
 
 func (s *userStore) PutUser(ctx context.Context, user *model.User) error {
 	usr := dbmodels.FromDomainUser(user)
-	batch := s.session.NewBatch(gocql.UnloggedBatch).WithContext(ctx)
+	batch := s.session.NewBatch(gocql.LoggedBatch).WithContext(ctx)
 	s.putUser(batch, usr)
 	return s.session.ExecuteBatch(batch)
 }
 
 func (s *userStore) PutUserCredential(ctx context.Context, id model.ID, creds *model.Credentials) error {
 	dbCreds := dbmodels.FromDomainUserCredential(id, creds)
-	query := s.session.Query(insertUserCredential, dbCreds.Email, dbCreds.UserID, dbCreds.Password,
-		dbCreds.Enabled, dbCreds.CreatedAt, dbCreds.LastSignin).WithContext(ctx)
-	return query.Exec()
+	// batch it
+	batch := s.session.NewBatch(gocql.LoggedBatch).WithContext(ctx)
+	batch.Query(insertUserCredential, dbCreds.Email, dbCreds.Username, dbCreds.UserID, dbCreds.Password,
+		dbCreds.Enabled, dbCreds.CreatedAt, dbCreds.LastSignin)
+	batch.Query(insertUserCredentialByUsername, dbCreds.Email, dbCreds.Username, dbCreds.UserID, dbCreds.Password,
+		dbCreds.Enabled, dbCreds.CreatedAt, dbCreds.LastSignin)
+
+	return s.session.ExecuteBatch(batch)
 }
 
 func (s *userStore) FindOrCreateUserForProvider(ctx context.Context, userData *model.User, provider model.OauthProvider) (newUser bool, user *model.User, err error) {
@@ -53,8 +61,8 @@ func (s *userStore) FindOrCreateUserForProvider(ctx context.Context, userData *m
 		if err != gocql.ErrNotFound {
 			return false, nil, err
 		}
-		// insert it
-		batch := s.session.NewBatch(gocql.UnloggedBatch).WithContext(ctx)
+		// user didn't exists. insert it
+		batch := s.session.NewBatch(gocql.LoggedBatch).WithContext(ctx)
 		s.putUser(batch, dbmodels.FromDomainUser(userData))
 		batch.Query(insertUserProvider, provider.Name, provider.Key, int64(userData.ID))
 		if err = s.session.ExecuteBatch(batch); err != nil {
@@ -88,6 +96,32 @@ func (s *userStore) GetCredentialByEmail(ctx context.Context, email string) (*mo
 	return creds.ToDomain(), nil
 }
 
+func (s *username) GetCredentialByUsername(ctx context.Context, username string) (*model.Credentials, error) {
+	creds := &dbmodels.Credentials{username: username}
+	if err := s.session.Query(queryUserCredentialByUsername, username).WithContext(ctx).Scan(
+		&creds.UserID,
+		&creds.Email,
+		&creds.Password,
+		&creds.Enabled,
+		&creds.CreatedAt,
+		&creds.LastSignin,
+	); err != nil {
+		return nil, err
+	}
+	return creds.ToDomain(), nil
+}
+
+func (s *userStore) IsUsernameAlreadyInUse(ctx contex.Context, username string) (*model.Credentials, error) {
+	creds, err := s.GetCredentialByUsername(ctx, username)
+	if err != nil {
+		if err == gocql.ErrNotFound {
+			return true, model.ID(creds.UserID), nil
+		}
+		return false, model.ID(0), err
+	}
+	return true, model.ID(creds.UserID), nil
+}
+
 func (s *userStore) GetUserByID(ctx context.Context, id model.ID) (*model.User, error) {
 	user, err := s.getUserByID(ctx, int64(id))
 	if err != nil {
@@ -98,11 +132,15 @@ func (s *userStore) GetUserByID(ctx context.Context, id model.ID) (*model.User, 
 
 func (s *userStore) GetUserBySlug(ctx context.Context, slug string) (*model.User, error) {
 	usr := &dbmodels.User{}
-	if err := s.session.Query(queryUserBySlug, slug).WithContext(ctx).Scan(
+	query := s.session.Query(queryUserBySlug, slug).WithContext(ctx)
+	defer query.Release()
+
+	if err := query.Scan(
 		&usr.ID,
 		&usr.Slug,
 		&usr.Name,
 		&usr.Email,
+		&usr.Username,
 		&usr.Icon,
 		&usr.Role,
 		&usr.Status,
@@ -128,8 +166,12 @@ func (s *userStore) ErrorCode(err error) kerr.ErrorCode {
 
 func (s *userStore) getUserCredential(ctx context.Context, email string) (*dbmodels.Credentials, error) {
 	creds := &dbmodels.Credentials{Email: email}
-	if err := s.session.Query(queryUserCredentialByEmail, email).WithContext(ctx).Scan(
+	query := s.session.Query(queryUserCredentialByEmail, email).WithContext(ctx)
+	defer query.Release()
+
+	if err := query.Scan(
 		&creds.UserID,
+		&creds.Username,
 		&creds.Password,
 		&creds.Enabled,
 		&creds.CreatedAt,
@@ -146,22 +188,26 @@ func (s *userStore) putUser(batch *gocql.Batch, user *dbmodels.User) {
 }
 
 func (s *userStore) putUserByID(batch *gocql.Batch, usr *dbmodels.User) {
-	batch.Query(insertUser, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
+	batch.Query(insertUser, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Username, usr.Icon,
 		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt)
 }
 
 func (s *userStore) putUserBySlug(batch *gocql.Batch, usr *dbmodels.User) {
-	batch.Query(insertUserSlug, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Icon,
+	batch.Query(insertUserSlug, usr.ID, usr.Slug, usr.Name, usr.Email, usr.Username, usr.Icon,
 		usr.Role, usr.Status, usr.Bio, usr.Age, usr.Address, usr.Category, usr.Budget, usr.CreatedAt)
 }
 
 func (s *userStore) getUserByID(ctx context.Context, id int64) (user *dbmodels.User, err error) {
 	usr := &dbmodels.User{}
-	if err := s.session.Query(queryUserByID, id).WithContext(ctx).Scan(
+	query := s.session.Query(queryUserByID, id).WithContext(ctx)
+	defer query.Release()
+
+	if err := query.Scan(
 		&usr.ID,
 		&usr.Slug,
 		&usr.Name,
 		&usr.Email,
+		&usr.Username,
 		&usr.Icon,
 		&usr.Role,
 		&usr.Status,

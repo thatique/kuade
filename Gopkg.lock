@@ -73,17 +73,6 @@
   version = "v0.0.1"
 
 [[projects]]
-  digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
-  name = "github.com/gomodule/redigo"
-  packages = [
-    "internal",
-    "redis",
-  ]
-  pruneopts = "UT"
-  revision = "9c11da706d9b7902c6da69c592f75637793fe121"
-  version = "v2.0.0"
-
-[[projects]]
   digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
   name = "github.com/google/btree"
   packages = ["."]
@@ -172,18 +161,18 @@
   name = "github.com/minio/minio"
   packages = ["pkg/wildcard"]
   pruneopts = "UT"
-  revision = "781012517d55ab096a4e77215bcb8da6de9ed5fa"
+  revision = "4b858b562a0887e10bfd0414dc87e68f1af31c3a"
 
 [[projects]]
-  digest = "1:056892a99dec71a48adb6328c24106df5a9ac6d2612bc38ae7b53af4344525ed"
+  digest = "1:df947f8ce8e4564178301ae5b042d6c56d813fee9dbf9bc46d75fc2c4c0508f5"
   name = "github.com/minio/minio-go"
   packages = [
     "pkg/s3utils",
     "pkg/set",
   ]
   pruneopts = "UT"
-  revision = "a8704b60278f98501c10f694a9c4df8bdd1fac56"
-  version = "v6.0.23"
+  revision = "10b3660b8f09a1c25db63da7bf2d4f7449acc366"
+  version = "v6.0.24"
 
 [[projects]]
   digest = "1:53bc4cd4914cd7cd52139990d5170d6dc99067ae31c56530621b18b35fc30318"
@@ -234,12 +223,12 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:e0f50a07c0def90588d69f77178712c6fdc67eb6576365f551cce98b44b501bf"
+  digest = "1:93131d8002d7025da13582877c32d1fc302486775a1b06f62241741006428c5e"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "63909f0a90ab0f36909e8e044e46ace10cf13ba2"
-  version = "v1.3.0"
+  revision = "728039f679cbcd4f6a54e080d2219a4c4928c546"
+  version = "v1.4.0"
 
 [[projects]]
   branch = "master"
@@ -381,11 +370,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dcd2e9de31e20e01b156288ce4fc239498564295bdbb59d8aaf591af94778162"
+  digest = "1:1ddfda089b8a15d92242412aabc1107b8c7a87c609c09c5b441c81dbcca0ab79"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "2cc0cad0ac78f3ede1f4d2b6ca16ea3038641af4"
+  revision = "a43fa875dd822b81eb6d2ad538bc1f4caba169bd"
 
 [[projects]]
   digest = "1:be0ed9f5421c3a22c29887400b612d82cda2b348672bf390bc66dda04e08787f"
@@ -455,7 +444,6 @@
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/types",
     "github.com/golang/protobuf/proto",
-    "github.com/gomodule/redigo/redis",
     "github.com/google/btree",
     "github.com/gorilla/mux",
     "github.com/minio/minio-go/pkg/s3utils",

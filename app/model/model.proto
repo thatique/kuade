@@ -36,16 +36,6 @@ enum BudgetLevel {
     HIGH = 2;
 }
 
-message PasswordChangeToken {
-    string token      = 1;
-    string email      = 2;
-    bytes  password   = 3;
-    google.protobuf.Timestamp created_at = 4 [
-        (gogoproto.stdtime) = true,
-        (gogoproto.nullable) = false
-    ];
-}
-
 message Point {
     double latitude = 1;
     double longitude = 2;
@@ -76,19 +66,34 @@ message User {
     string name  = 3;
     // email must be unique
     string email = 4;
-    string icon  = 5;
+    // username must be unique
+    string username = 5;
     UserRole role = 6;
     UserStatus status = 7;
     string bio = 8;
     int32 age = 9;
     Address address = 10 [(gogoproto.nullable) = false];
     // vendor specific fields
-    string category = 11;
-    BudgetLevel budget = 12;
-    google.protobuf.Timestamp created_at = 13 [
+    string icon  = 11;
+    string category = 12;
+    BudgetLevel budget = 13;
+    google.protobuf.Timestamp created_at = 14 [
         (gogoproto.stdtime) = true,
         (gogoproto.nullable) = false
     ];
+}
+
+// When listing user's resource we don't need to load all user info
+message UserInfo {
+    bytes id = 1 [
+        (gogoproto.nullable) = false,
+        (gogoproto.customname) = "ID",
+        (gogoproto.customtype) = "ID"
+    ];
+    string username = 2;
+    string email    = 3;
+    string slug     = 4;
+    string icon     = 5;
 }
 
 message OauthProvider {
@@ -96,20 +101,23 @@ message OauthProvider {
     string key  = 2;
 }
 
+// Even if user didn't have password, this records should be attached to clain
+// user email and username
 message Credentials {
     string email = 1;
-    bytes password = 2;
-    bytes user_id = 3[
+    string username = 2;
+    bytes password = 3;
+    bytes user_id = 4 [
         (gogoproto.nullable) = false,
         (gogoproto.customname) = "UserID",
         (gogoproto.customtype) = "ID"
     ];
-    bool enabled = 4;
-    google.protobuf.Timestamp created_at = 5 [
+    bool enabled = 5;
+    google.protobuf.Timestamp created_at = 6 [
         (gogoproto.stdtime) = true,
         (gogoproto.nullable) = false
     ];
-    google.protobuf.Timestamp last_signin = 6 [
+    google.protobuf.Timestamp last_signin = 7 [
         (gogoproto.stdtime) = true,
         (gogoproto.nullable) = false
     ];

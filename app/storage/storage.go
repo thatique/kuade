@@ -2,8 +2,12 @@ package storage
 
 import (
 	"context"
+	"flag"
 	"net/url"
 
+	"github.com/spf13/viper"
+	"github.com/syaiful6/sersan"
+	"github.com/thatique/kuade/app/config"
 	"github.com/thatique/kuade/app/storage/driver"
 	"github.com/thatique/kuade/pkg/metrics"
 	"github.com/thatique/kuade/pkg/openurl"
@@ -45,18 +49,34 @@ func (s *Store) GetUserStorage() (*UserStore, error) {
 	return s.user, nil
 }
 
+// GetSessionStore get driver session store without wrapping
+func (s *Storage) GetSessionStore() (sersan.Storage, error) {
+	return s.driver.GetSessionStore()
+}
+
 // URLOpener can create Storage based URL
 type URLOpener interface {
+	config.Configurable
+
 	OpenStorageURL(ctx context.Context, u *url.URL) (*Store, error)
 }
 
 // URLMux is store registered storage driver
 type URLMux struct {
 	schemes openurl.SchemaMap
+	openers map[string]URLOpener
 }
 
 // RegisterStorage register storage to URLMux
 func (mux *URLMux) RegisterStorage(scheme string, opener URLOpener) {
+	if mux.opener == nil {
+		mux.opener = make(map[string]URLOpener)
+	}
+	_, registered := mux.opener[scheme]
+	if registered {
+		panic(fmt.Sprintf("URLOpener with scheme %s already registered", scheme))
+	}
+	mux.opener[scheme] = opener
 	mux.schemes.Register("storage", "Storage", scheme, opener)
 }
 
@@ -77,6 +97,26 @@ func (mux *URLMux) OpenStorageURL(ctx context.Context, u *url.URL) (*Store, erro
 		return nil, err
 	}
 	return opener.(URLOpener).OpenStorageURL(ctx, u)
+}
+
+// AddFlags adds CLI flags for configuring the registered url opener.
+func (mux *URLMux) AddFlags(flagSet *flag.FlagSet) {
+	if mux.opener == nil {
+		return
+	}
+	for _, opener := range mux.opener {
+		opener.AddFlags(flagSet)
+	}
+}
+
+// InitFromViper initializes the registered url opener with properties from spf13/viper.
+func (mux *URLOpener) InitFromViper(v *viper.Viper) {
+	if mux.opener == nil {
+		return
+	}
+	for _, opener := range mux.opener {
+		opener.InitFromViper(v)
+	}
 }
 
 var defaultURLMux = new(URLMux)

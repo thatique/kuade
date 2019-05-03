@@ -20,11 +20,13 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.users (
   slug       text,
   name       text,
   email      text,
+  username   text,
   icon       text,
   role       int,
   status     int,
   bio        text,
   age        int,
+  icon       text,
   address    address,
   category   text,
   budget     int,
@@ -38,11 +40,12 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.users_by_slug (
   id         bigint,
   name       text,
   email      text,
-  icon       text,
+  username   text,
   role       int,
   status     int,
   bio        text,
   age        int,
+  icon       text,
   address    address,
   category   text,
   budget     int,
@@ -52,6 +55,7 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.users_by_slug (
 
 CREATE TABLE IF NOT EXISTS ${keyspace}.user_credentials (
   email        text,
+  username     text,
   user_id      bigint,
   password     blob,
   enabled      boolean,
@@ -59,6 +63,18 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.user_credentials (
   last_signin  timestamp,
 
   PRIMARY KEY (email)
+);
+
+CREATE TABLE IF NOT EXISTS ${keyspace}.user_credentials_by_username (
+  username     text,
+  email        text,
+  user_id      bigint,
+  password     blob,
+  enabled      boolean,
+  created_at   timestamp,
+  last_signin  timestamp,
+
+  PRIMARY KEY (username)
 );
 
 CREATE TABLE IF NOT EXISTS ${keyspace}.user_providers (
@@ -71,36 +87,36 @@ CREATE TABLE IF NOT EXISTS ${keyspace}.user_providers (
 
 -- table to store user's session using sersan lib
 CREATE TABLE IF NOT EXISTS ${keyspace}.sessions (
-    id          text,
-    auth_id     text,
-    values      blob,
-    created_at  timestamp,
-    accessed_at timestamp,
+  id          text,
+  auth_id     text,
+  values      blob,
+  created_at  timestamp,
+  accessed_at timestamp,
 
-    PRIMARY KEY (id)
+  PRIMARY KEY (id)
 )
-    WITH compaction = {
-        'compaction_window_size': '1',
-        'compaction_window_unit': 'HOURS',
-        'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
-    }
-    AND dclocal_read_repair_chance = 0.0
-    AND default_time_to_live = ${session_ttl}
-    AND speculative_retry = 'NONE'
-    and gc_grace_seconds = 10800;
+  WITH compaction = {
+    'compaction_window_size': '1',
+    'compaction_window_unit': 'HOURS',
+    'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
+  }
+  AND dclocal_read_repair_chance = 0.0
+  AND default_time_to_live = ${session_ttl}
+  AND speculative_retry = 'NONE'
+  and gc_grace_seconds = 10800;
 
-CREATE TABLE IF NOT EXISTS ${keyspace}.session_auth_index (
-    auth_id text,
-    id      text,
+CREATE TABLE IF NOT EXISTS ${keyspace}.sessions_auth_index (
+  auth_id text,
+  id      text,
 
-    PRIMARY KEY (auth_id, id)
+  PRIMARY KEY (auth_id, id)
 )
-    WITH compaction = {
-        'compaction_window_size': '1',
-        'compaction_window_unit': 'HOURS',
-        'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
-    }
-    AND dclocal_read_repair_chance = 0.0
-    AND default_time_to_live = ${session_ttl}
-    AND speculative_retry = 'NONE'
-    and gc_grace_seconds = 10800;
+  WITH compaction = {
+    'compaction_window_size': '1',
+    'compaction_window_unit': 'HOURS',
+    'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
+  }
+  AND dclocal_read_repair_chance = 0.0
+  AND default_time_to_live = ${session_ttl}
+  AND speculative_retry = 'NONE'
+  and gc_grace_seconds = 10800;

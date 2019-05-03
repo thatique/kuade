@@ -69,7 +69,7 @@ func (m *SchemaMap) FromURL(typ string, u *url.URL) (interface{}, error) {
 	return v, nil
 }
 
-func (m *SchemaMap) availableSchemes() []string {
+func (m *SchemaMap) Schemes() []string {
 	var schemes []string
 	for s := range m.m {
 		schemes = append(schemes, s)

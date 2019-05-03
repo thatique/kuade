@@ -11,6 +11,7 @@ type User struct {
 	Slug      string
 	Name      string
 	Email     string
+	Username  string
 	Icon      string
 	Role      int32
 	Status    int32
@@ -24,6 +25,7 @@ type User struct {
 
 type Credentials struct {
 	Email      string
+	Username   string
 	UserID     int64
 	Password   []byte
 	Enabled    bool
@@ -37,6 +39,7 @@ func FromDomainUser(user *model.User) *User {
 		Slug:      user.GetSlug(),
 		Name:      user.GetName(),
 		Email:     user.GetEmail(),
+		Username:  user.GetUsername(),
 		Role:      int32(user.GetRole()),
 		Status:    int32(user.GetStatus()),
 		Bio:       user.GetBio(),
@@ -54,6 +57,7 @@ func (user *User) ToDomain() *model.User {
 		Slug:      user.Slug,
 		Name:      user.Name,
 		Email:     user.Email,
+		Username:  user.Username,
 		Role:      model.UserRole(user.Role),
 		Status:    model.UserStatus(user.Status),
 		Bio:       user.Bio,
@@ -69,6 +73,7 @@ func FromDomainUserCredential(id model.ID, creds *model.Credentials) *Credential
 	return &Credentials{
 		UserID:     int64(id),
 		Email:      creds.GetEmail(),
+		Username:   creds.GetUsername(),
 		Password:   creds.GetPassword(),
 		Enabled:    creds.GetEnabled(),
 		CreatedAt:  creds.GetCreatedAt(),
@@ -80,6 +85,7 @@ func (creds *Credentials) ToDomain() *model.Credentials {
 	return &model.Credentials{
 		UserID:     model.ID(creds.UserID),
 		Email:      creds.Email,
+		Username:   creds.Username,
 		Password:   creds.Password,
 		Enabled:    creds.Enabled,
 		CreatedAt:  creds.CreatedAt,

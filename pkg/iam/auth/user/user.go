@@ -15,7 +15,7 @@ const (
 type Info interface {
 	// GetUserName returns the name that uniquely identifies this user among all
 	// other active users. This can be an email or username.
-	GetUserName() string
+	GetUsername() string
 
 	// GetUID returns a unique value for a particular user that will change
 	// if the user is removed from the system and another user is added with

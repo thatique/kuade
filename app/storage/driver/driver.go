@@ -1,13 +1,13 @@
 package driver
 
 import (
-	"github.com/thatique/kuade/app/config"
+	"github.com/syaiful6/sersan"
 )
 
 // Driver is storage driver
 type Driver interface {
-	config.Configurable
-
+	// GetSessionStore return sersan.Storage implementation
+	GetSessionStore() (sersan.Storage, error)
 	// GetUserStorage
 	GetUserStore() (UserStore, error)
 }
