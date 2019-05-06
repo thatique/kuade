@@ -64,7 +64,7 @@ func (m *SchemaMap) FromURL(typ string, u *url.URL) (interface{}, error) {
 	}
 	v, ok := m.m[scheme]
 	if !ok {
-		return nil, fmt.Errorf("open %s.%s: no provider registered for %q for URL %q; available schemes: %v", m.api, typ, scheme, u, strings.Join(m.availableSchemes(), ", "))
+		return nil, fmt.Errorf("open %s.%s: no provider registered for %q for URL %q; available schemes: %v", m.api, typ, scheme, u, strings.Join(m.Schemes(), ", "))
 	}
 	return v, nil
 }

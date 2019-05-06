@@ -13,13 +13,14 @@ import (
 	"github.com/syaiful6/sersan"
 	"github.com/thatique/kuade/app/storage"
 	"github.com/thatique/kuade/app/storage/driver"
+	"github.com/thatique/kuade/pkg/queue"
 )
 
 func init() {
 	storage.DefaultURLMux().RegisterStorage(Scheme, &URLOpener{option: NewDefaultOptions()})
 }
 
-const Schema = "cassandra"
+const Scheme = "cassandra"
 
 // URLOpener opens Cassandra URLs like "cassandra://keyspace".
 type URLOpener struct {
@@ -31,7 +32,7 @@ func (opener *URLOpener) OpenStorageURL(ctx context.Context, u *url.URL) (*stora
 	for param := range u.Query() {
 		return nil, fmt.Errorf("open storage %v: invalid query parameter %q", u, param)
 	}
-	return OpenStorage(ctx, u.Host, o.option)
+	return OpenStorage(ctx, u.Host, opener.option)
 }
 
 // AddFlags adds CLI flags for configuring cassandra storage
@@ -47,19 +48,48 @@ func (opener *URLOpener) InitFromViper(v *viper.Viper) {
 // OpenStorage returns a *storage.Store backed by Cassandra. See the
 // package documentation for an example.
 func OpenStorage(ctx context.Context, keyspace string, opt *Option) (*storage.Store, error) {
+	s, err := openStorage(ctx, keyspace, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	return storage.New(s), nil
+}
+
+func openStorage(ctx context.Context, keyspace string, opt *Option) (*Storage, error) {
 	config := opt.GetConfig(keyspace)
 	session, err := config.NewSession()
 	if err != nil {
 		return nil, err
 	}
 
-	return storage.New(&Storage{session: session}), nil
+	s := &Storage{
+		session: session,
+		queue:   queue.NewBoundedQueue(opt.capacity, nil),
+	}
+	s.queue.StartConsumer(opt.numWorker, func(item interface{}) {
+		value := item.(asyncQuery)
+		value.Fire(session)
+	})
+
+	return s, nil
+}
+
+type asyncQuery interface {
+	Fire(*gocql.Session) error
+}
+
+type asyncQueryFunc func(*gocql.Session) error
+
+func (f asyncQueryFunc) Fire(sess *gocql.Session) error {
+	return f(sess)
 }
 
 // Storage is cassandra implementation of storage driver
 type Storage struct {
-	session *gocql.userStore
-
+	session *gocql.Session
+	// used to execute query asyncronously
+	queue *queue.BoundedQueue
 	// set up when first request
 	users *userStore
 }
@@ -75,7 +105,14 @@ func (s *Storage) GetUserStore() (driver.UserStore, error) {
 
 // GetSessionStore return driver.GetSessionStore implementation backed by cassandra
 func (s *Storage) GetSessionStore() (sersan.Storage, error) {
-	return &sessionStore{session: s.session}, nil
+	return &sessionStore{session: s.session, queue: s.queue}, nil
+}
+
+func (s *Storage) Close() error {
+	s.queue.Stop()
+	s.session.Close()
+
+	return nil
 }
 
 // Option for connection to Cassandra server
@@ -83,6 +120,9 @@ type Option struct {
 	Configuration
 
 	servers string
+
+	capacity  int
+	numWorker int
 }
 
 // NewDefaultOption return default Option
@@ -99,7 +139,9 @@ func NewDefaultOptions() *Option {
 			ConnectionsPerHost: 2,
 			ReconnectInterval:  60 * time.Second,
 		},
-		servers: "127.0.0.1",
+		servers:   "127.0.0.1",
+		numWorker: 50,
+		capacity:  2000,
 	}
 }
 
@@ -108,7 +150,7 @@ func NewDefaultOptions() *Option {
 func (opt *Option) GetConfig(keyspace string) *Configuration {
 	opt.Servers = strings.Split(opt.servers, ",")
 	opt.Keyspace = keyspace
-	return &opt.Config
+	return &opt.Configuration
 }
 
 // AddFlags add cli flag for this option
@@ -121,7 +163,7 @@ func (opt *Option) AddFlags(flagSet *flag.FlagSet) {
 		"cassandra-max-retry-attempts",
 		opt.MaxRetryAttempts,
 		"The number of attempts when reading from Cassandra")
-	flagSet.Int(
+	flagSet.Duration(
 		"cassandra-timeout",
 		opt.Timeout,
 		"Timeout used for queries. A Timeout of zero means no timeout")
@@ -185,10 +227,18 @@ func (opt *Option) AddFlags(flagSet *flag.FlagSet) {
 		"cassandra-tls-verify-host",
 		opt.TLS.EnableHostVerification,
 		"Enable (or disable) host key verification")
+	flagSet.Int(
+		"cassandra-queue-capacity",
+		opt.capacity,
+		"size of the queue to process async query")
+	flagSet.Int(
+		"cassandra-queue-worker",
+		opt.numWorker,
+		"Number of worker used to execute async query")
 }
 
 // initFromViper initialize option using viper variable
-func (opt *Option) initFromViper(v *viper.Viper) {
+func (opt *Option) InitFromViper(v *viper.Viper) {
 	opt.ConnectionsPerHost = v.GetInt("cassandra-connections-per-host")
 	opt.MaxRetryAttempts = v.GetInt("cassandra-max-retry-attempts")
 	opt.Timeout = v.GetDuration("cassandra-timeout")
@@ -207,4 +257,5 @@ func (opt *Option) initFromViper(v *viper.Viper) {
 	opt.TLS.CaPath = v.GetString("cassandra-tls-ca")
 	opt.TLS.ServerName = v.GetString("cassandra-tls-server-name")
 	opt.TLS.EnableHostVerification = v.GetBool("cassandra-tls-verify-host")
+	opt.numWorker = v.GetInt("cassandra-queue-worker")
 }

@@ -1,6 +1,10 @@
 package cassandra
 
 import (
+	"crypto/tls"
+	"fmt"
+	"time"
+
 	"github.com/gocql/gocql"
 )
 

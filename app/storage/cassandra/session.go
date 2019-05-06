@@ -8,6 +8,7 @@ import (
 
 	"github.com/gocql/gocql"
 	"github.com/syaiful6/sersan"
+	"github.com/thatique/kuade/pkg/queue"
 )
 
 const (
@@ -22,8 +23,20 @@ const (
 	deleteAllAuthSession = `DELETE FROM sessions_auth_index WHERE auth_id = ?`
 )
 
+type deleteSessionJob struct {
+	ID string
+}
+
+func (d *deleteSessionJob) Fire(sess *gocql.Session) error {
+	query := sess.Query(deleteSession, d.ID)
+	defer query.Release()
+
+	return query.Exec()
+}
+
 type sessionStore struct {
 	session *gocql.Session
+	queue   *queue.BoundedQueue
 }
 
 func (s *sessionStore) Get(id string) (session *sersan.Session, err error) {
@@ -48,7 +61,7 @@ func (s *sessionStore) Get(id string) (session *sersan.Session, err error) {
 		return nil, err
 	}
 
-	session := sersan.NewSession(id, authID, createdAt)
+	session = sersan.NewSession(id, authID, createdAt)
 	session.AccessedAt = accessedAt
 
 	dec := gob.NewDecoder(bytes.NewBuffer(values))
@@ -75,7 +88,7 @@ func (s *sessionStore) Destroy(id string) (err error) {
 		return err
 	}
 
-	if authID != nil {
+	if authID != "" {
 		if err = s.deleteAuthSession(authID, id); err != nil && err != gocql.ErrNotFound {
 			return err
 		}
@@ -84,21 +97,21 @@ func (s *sessionStore) Destroy(id string) (err error) {
 	return nil
 }
 
-func (s *sessionStore) DestroyAllOfAuthId(authId string) error {
+func (s *sessionStore) DestroyAllOfAuthId(authID string) error {
 	var id string
 	iter := s.session.Query(selectIDsByAuthID, authID).Iter()
 
-	batch := s.session.NewBatch(gocql.LoggedBatch)
 	for iter.Scan(&id) {
-		batch.Query(deleteSession, id)
+		s.queue.Produce(&deleteSessionJob{ID: id})
 	}
 	if err := iter.Close(); err != nil {
 		return err
 	}
-	// delete this index as well
-	batch.Query(deleteAllAuthSession, authID)
+	// delete this index as well, but execute this without gourotine
+	query := s.session.Query(deleteAllAuthSession, authID)
+	defer query.Release()
 
-	return s.session.ExecuteBatch(batch)
+	return query.Exec()
 }
 
 func (s *sessionStore) Insert(sess *sersan.Session) (err error) {
@@ -118,20 +131,28 @@ func (s *sessionStore) Replace(sess *sersan.Session) (err error) {
 }
 
 func (s *sessionStore) putSession(sess *sersan.Session) (err error) {
-	batch := s.session.NewBatch(gocql.LoggedBatch)
-
 	buf := new(bytes.Buffer)
 	enc := gob.NewEncoder(buf)
 	if err = enc.Encode(sess.Values); err != nil {
 		return err
 	}
 
-	batch.Query(updateSession, sess.AuthID, buf.Bytes(), sess.CreatedAt, sess.AccessedAt, sess.ID)
-	if sess.AuthID != "" {
-		batch.Query(updateAuthSession, sess.AuthID, sess.ID)
+	query := s.session.Query(updateSession, sess.AuthID, buf.Bytes(), sess.CreatedAt, sess.AccessedAt, sess.ID)
+	defer query.Release()
+	if err = query.Exec(); err != nil {
+		return err
 	}
 
-	return s.session.ExecuteBatch(batch)
+	if sess.AuthID != "" {
+		idxSessQuery := s.session.Query(updateAuthSession, sess.AuthID, sess.ID)
+		defer idxSessQuery.Release()
+
+		if err = idxSessQuery.Exec(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *sessionStore) deleteSession(id string) (err error) {

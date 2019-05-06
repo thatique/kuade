@@ -10,4 +10,6 @@ type Driver interface {
 	GetSessionStore() (sersan.Storage, error)
 	// GetUserStorage
 	GetUserStore() (UserStore, error)
+	// Close close the underlying connection
+	Close() error
 }

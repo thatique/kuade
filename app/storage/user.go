@@ -102,7 +102,7 @@ func (s *UserStore) GetCredentialByUsername(ctx context.Context, username string
 	ctx = s.tracer.Start(ctx, "GetCredentialByUsername")
 	defer func() { s.tracer.End(ctx, err) }()
 
-	creds, err = s.store.GetCredentialByUsername(ctx, email)
+	creds, err = s.store.GetCredentialByUsername(ctx, username)
 	if err != nil {
 		err = wrapUserStoreError(s.store, err)
 	}

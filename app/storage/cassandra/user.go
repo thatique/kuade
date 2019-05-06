@@ -96,8 +96,8 @@ func (s *userStore) GetCredentialByEmail(ctx context.Context, email string) (*mo
 	return creds.ToDomain(), nil
 }
 
-func (s *username) GetCredentialByUsername(ctx context.Context, username string) (*model.Credentials, error) {
-	creds := &dbmodels.Credentials{username: username}
+func (s *userStore) GetCredentialByUsername(ctx context.Context, username string) (*model.Credentials, error) {
+	creds := &dbmodels.Credentials{Username: username}
 	if err := s.session.Query(queryUserCredentialByUsername, username).WithContext(ctx).Scan(
 		&creds.UserID,
 		&creds.Email,
@@ -111,7 +111,7 @@ func (s *username) GetCredentialByUsername(ctx context.Context, username string)
 	return creds.ToDomain(), nil
 }
 
-func (s *userStore) IsUsernameAlreadyInUse(ctx contex.Context, username string) (*model.Credentials, error) {
+func (s *userStore) IsUsernameAlreadyInUse(ctx context.Context, username string) (bool, model.ID, error) {
 	creds, err := s.GetCredentialByUsername(ctx, username)
 	if err != nil {
 		if err == gocql.ErrNotFound {
