@@ -81,7 +81,7 @@ func (s *userStore) IsEmailAlreadyInUse(ctx context.Context, email string) (bool
 	creds, err := s.getUserCredential(ctx, email)
 	if err != nil {
 		if err == gocql.ErrNotFound {
-			return true, model.ID(creds.UserID), nil
+			return false, model.ID(0), nil
 		}
 		return false, model.ID(0), err
 	}
@@ -115,7 +115,7 @@ func (s *userStore) IsUsernameAlreadyInUse(ctx context.Context, username string)
 	creds, err := s.GetCredentialByUsername(ctx, username)
 	if err != nil {
 		if err == gocql.ErrNotFound {
-			return true, model.ID(creds.UserID), nil
+			return false, model.ID(0), nil
 		}
 		return false, model.ID(0), err
 	}

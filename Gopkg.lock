@@ -73,12 +73,28 @@
   version = "v0.0.1"
 
 [[projects]]
-  digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
-  name = "github.com/google/btree"
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
+  name = "github.com/gorilla/context"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
-  version = "v1.0.0"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:c6c7d7d1c2a4f9845f37c6f17f83fe1adcb41bebc891b94cd1ef95be1ce6b5e7"
+  name = "github.com/gorilla/csrf"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "05b4a732b984ec326cac085631060968d4706b17"
+  version = "v1.5.1"
+
+[[projects]]
+  digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
+  name = "github.com/gorilla/handlers"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:d5f97fc268267ec1b61c3453058c738246fc3e746f14b1ae25161513b7367b0c"
@@ -140,14 +156,6 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
   digest = "1:c568d7727aa262c32bdf8a3f7db83614f7af0ed661474b24588de635c20024c7"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -161,7 +169,7 @@
   name = "github.com/minio/minio"
   packages = ["pkg/wildcard"]
   pruneopts = "UT"
-  revision = "4b858b562a0887e10bfd0414dc87e68f1af31c3a"
+  revision = "757c639044030b22cfe9e2ef8073dd8620d88eb9"
 
 [[projects]]
   digest = "1:df947f8ce8e4564178301ae5b042d6c56d813fee9dbf9bc46d75fc2c4c0508f5"
@@ -231,12 +239,12 @@
   version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
-  name = "github.com/petar/GoLLRB"
-  packages = ["llrb"]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:2ee0f15eb0fb04f918db7c2dcf39745f40d69f798ef171610a730e8a56aaa4fd"
@@ -253,14 +261,6 @@
   pruneopts = "UT"
   revision = "7bfe4c7ecddb3666a94b053b422cdd8f5aaa3615"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:fd61cf4ae1953d55df708acb6b91492d538f49c305b364a014049914495db426"
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "8bdbc7bcc01dcbb8ec23dc8a28e332258d25251f"
-  version = "v1.4.1"
 
 [[projects]]
   digest = "1:bb495ec276ab82d3dd08504bbc0594a65de8c3b22c6f2aaa92d05b73fbf3a82e"
@@ -366,15 +366,15 @@
     "pbkdf2",
   ]
   pruneopts = "UT"
-  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
+  revision = "e1dfcc566284e143ba8f9afbb3fa563f2a0d212b"
 
 [[projects]]
   branch = "master"
-  digest = "1:1ddfda089b8a15d92242412aabc1107b8c7a87c609c09c5b441c81dbcca0ab79"
+  digest = "1:f42e547cbcaa2cf6548b0bb27a350f75db23340d062877fb534c06eb57934e8c"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "a43fa875dd822b81eb6d2ad538bc1f4caba169bd"
+  revision = "12bbe5a7a5209180b72cc7e3ed9da40442fe3246"
 
 [[projects]]
   digest = "1:be0ed9f5421c3a22c29887400b612d82cda2b348672bf390bc66dda04e08787f"
@@ -408,14 +408,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d9d3a231c70b17470fc134900032da48d5c146f0f4a2ce12ceb92704dae8d67d"
+  digest = "1:09ee0f91c5fb953a8aa06dc4ab6234c7b034a1e379aa88a4116645eae4564d1a"
   name = "golang.org/x/xerrors"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "1f06c39b43733b74392b1972507822714ced3242"
+  revision = "385005612d73f6925de56cb1886917aeaf90e3c5"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -444,14 +444,14 @@
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/types",
     "github.com/golang/protobuf/proto",
-    "github.com/google/btree",
+    "github.com/gorilla/csrf",
+    "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/minio/minio-go/pkg/s3utils",
     "github.com/minio/minio-go/pkg/set",
     "github.com/minio/minio/pkg/wildcard",
     "github.com/mozillazg/go-unidecode",
     "github.com/russross/blackfriday",
-    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
     "github.com/syaiful6/sersan",

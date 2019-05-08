@@ -34,9 +34,9 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 
 	var credsFunc func(context.Context, string) (*model.Credentials, error)
 	if emailparser.IsValidEmail(username) {
-		credsFunc := pswd.users.GetCredentialByEmail
+		credsFunc = pswd.users.GetCredentialByEmail
 	} else {
-		credsFunc := pswd.users.GetCredentialByUsername
+		credsFunc = pswd.users.GetCredentialByUsername
 	}
 
 	creds, err := credsFunc(ctx, username)
