@@ -16,6 +16,13 @@ type Config struct {
 	rawsessionKeys string // base64
 }
 
+// DefaultAppConfig return the default Config
+func DefaultAppConfig() *Config {
+	return &Config{
+		httpSecure: false,
+	}
+}
+
 // AddFlags is part of interface config.Configurable
 func (c *Config) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.Bool(
