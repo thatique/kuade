@@ -68,8 +68,8 @@ func NewApp(ctx context.Context, config *Config, asset func(string) ([]byte, err
 	return app, nil
 }
 
-// ServerHTTP is part of http.Handler interface
-func (app *App) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP is part of http.Handler interface
+func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	app.router.ServeHTTP(w, r)
 }
 
