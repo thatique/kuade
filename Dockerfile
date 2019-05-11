@@ -25,7 +25,7 @@ RUN \
     apk add --no-cache git && \
     go get -u github.com/jteeuwen/go-bindata/... && \
     go-bindata -o assets/assets.go -pkg assets assets/... && \
-    go install
+    go install ./cmd/kuade
 
 FROM alpine:3.7
 
@@ -37,4 +37,4 @@ VOLUME ["/data"]
 
 ENTRYPOINT ["tini", "--"]
 
-CMD kuade server
+CMD kuade serve

@@ -65,9 +65,9 @@ func serveCommand() *cobra.Command {
 	vsrv := viper.New()
 	cfg := handlers.DefaultAppConfig()
 	srvopt := &serverOption{
-		storageURL:  "cassandra://kuade_test",
+		storageURL:  "memory://store",
 		ocAgentAddr: "127.0.0.1:55678",
-		addr:        ":8098",
+		addr:        ":8000",
 	}
 	serveCommand := &cobra.Command{
 		Use:   "serve",

@@ -13,7 +13,7 @@ type UserStore interface {
 	PutUser(context.Context, *model.User) error
 
 	// PutUserCredential set or create user credential
-	PutUserCredential(context.Context, model.ID, *model.Credentials) error
+	PutUserCredential(context.Context, *model.Credentials) error
 
 	// FindOrCreateUserForProvider find an user for provided oauth provider
 	// and return weather it's new user or not and user it'self

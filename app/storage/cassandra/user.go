@@ -43,8 +43,8 @@ func (s *userStore) PutUser(ctx context.Context, user *model.User) error {
 	return s.session.ExecuteBatch(batch)
 }
 
-func (s *userStore) PutUserCredential(ctx context.Context, id model.ID, creds *model.Credentials) error {
-	dbCreds := dbmodels.FromDomainUserCredential(id, creds)
+func (s *userStore) PutUserCredential(ctx context.Context, creds *model.Credentials) error {
+	dbCreds := dbmodels.FromDomainUserCredential(creds)
 	// batch it
 	batch := s.session.NewBatch(gocql.LoggedBatch).WithContext(ctx)
 	batch.Query(insertUserCredential, dbCreds.Email, dbCreds.Username, dbCreds.UserID, dbCreds.Password,

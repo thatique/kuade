@@ -69,7 +69,7 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 	creds.LastSignin = time.Now().UTC()
 
 	// update last login
-	err = pswd.users.PutUserCredential(context.Background(), usr.ID, creds)
+	err = pswd.users.PutUserCredential(context.Background(), creds)
 	if err != nil {
 		return nil, false, err
 	}

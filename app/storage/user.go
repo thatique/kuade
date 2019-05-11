@@ -40,11 +40,11 @@ func (s *UserStore) PutUser(ctx context.Context, user *model.User) (err error) {
 }
 
 // PutUserCredential set user's credentials or create it if it doesn't exists
-func (s *UserStore) PutUserCredential(ctx context.Context, id model.ID, creds *model.Credentials) (err error) {
+func (s *UserStore) PutUserCredential(ctx context.Context, creds *model.Credentials) (err error) {
 	ctx = s.tracer.Start(ctx, "PutUserCredential")
 	defer func() { s.tracer.End(ctx, err) }()
 
-	err = s.store.PutUserCredential(ctx, id, creds)
+	err = s.store.PutUserCredential(ctx, creds)
 	if err != nil {
 		err = wrapUserStoreError(s.store, err)
 	}

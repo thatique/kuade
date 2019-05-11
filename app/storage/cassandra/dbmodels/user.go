@@ -69,9 +69,9 @@ func (user *User) ToDomain() *model.User {
 	}
 }
 
-func FromDomainUserCredential(id model.ID, creds *model.Credentials) *Credentials {
+func FromDomainUserCredential(creds *model.Credentials) *Credentials {
 	return &Credentials{
-		UserID:     int64(id),
+		UserID:     int64(creds.UserID),
 		Email:      creds.GetEmail(),
 		Username:   creds.GetUsername(),
 		Password:   creds.GetPassword(),

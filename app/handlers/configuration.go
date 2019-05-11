@@ -40,14 +40,20 @@ func (c *Config) InitFromViper(v *viper.Viper) {
 	c.rawsessionKeys = v.GetString("session-keys")
 	c.httpSecure = v.GetBool("http-secure")
 	if c.rawsessionKeys != "" {
-		rawKeys := strings.Split(c.rawsessionKeys, ",")
-		c.sessionKeys = make([][]byte, len(rawKeys))
-		for _, rawkey := range rawKeys {
-			if key, err := c.configureSecretKey(strings.Trim(rawkey, " \t")); err == nil {
-				c.sessionKeys = append(c.sessionKeys, key)
-			}
+		c.sessionKeys = c.configureSecretKeys(c.rawsessionKeys)
+	}
+}
+
+func (c *Config) configureSecretKeys(s string) [][]byte {
+	rawKeys := strings.Split(s, ",")
+	var sessionKeys [][]byte
+	for _, rawkey := range rawKeys {
+		if key, err := c.configureSecretKey(strings.Trim(rawkey, " \t")); err == nil {
+			sessionKeys = append(sessionKeys, key)
 		}
 	}
+
+	return sessionKeys
 }
 
 func (c *Config) configureSecretKey(s string) ([]byte, error) {

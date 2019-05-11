@@ -125,7 +125,7 @@ type Option struct {
 	numWorker int
 }
 
-// NewDefaultOption return default Option
+// NewDefaultOptions return default Option
 func NewDefaultOptions() *Option {
 	return &Option{
 		Configuration: Configuration{
@@ -140,8 +140,8 @@ func NewDefaultOptions() *Option {
 			ReconnectInterval:  60 * time.Second,
 		},
 		servers:   "127.0.0.1",
-		numWorker: 50,
-		capacity:  2000,
+		numWorker: 5,
+		capacity:  1000,
 	}
 }
 
@@ -237,7 +237,7 @@ func (opt *Option) AddFlags(flagSet *flag.FlagSet) {
 		"Number of worker used to execute async query")
 }
 
-// initFromViper initialize option using viper variable
+// InitFromViper initialize option using viper variable
 func (opt *Option) InitFromViper(v *viper.Viper) {
 	opt.ConnectionsPerHost = v.GetInt("cassandra-connections-per-host")
 	opt.MaxRetryAttempts = v.GetInt("cassandra-max-retry-attempts")

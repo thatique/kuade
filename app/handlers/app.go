@@ -46,10 +46,12 @@ func NewApp(ctx context.Context, config *Config, asset func(string) ([]byte, err
 
 	app = &App{
 		Context:       ctx,
+		asset:         asset,
+		config:        config,
 		storage:       storage,
 		router:        router,
 		authenticator: appAuth,
-		renderer:      template.New(app.asset),
+		renderer:      template.New(asset),
 	}
 
 	sessionState, err := app.configureSersan()
