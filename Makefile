@@ -9,7 +9,7 @@ build-assets:
 
 build: build-assets proto
 	go-bindata -o assets/assets.go -pkg assets assets/...
-	go build
+	go build ./cmd/kuade
 
 clean:
 	@rm assets/assets.go

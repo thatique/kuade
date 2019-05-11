@@ -25,6 +25,7 @@ func Execute() error {
 		},
 	}
 	rootCmd.AddCommand(serveCommand())
+	rootCmd.AddCommand(secretKeyCommand())
 
 	return rootCmd.Execute()
 }

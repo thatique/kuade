@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	webPort     = "port"
+	appAddr     = "addr"
+	appNet      = "net"
 	storageURL  = "storage-url"
 	ocAgentAddr = "ocagent-addr"
 )
@@ -30,26 +31,34 @@ const (
 type serverOption struct {
 	storageURL  string
 	addr        string
+	net         string
 	ocAgentAddr string
 }
 
 func (opt *serverOption) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
-		webPort,
+		appAddr,
 		opt.addr,
 		"The addr and port to use to serve")
+	flagSet.String(
+		appNet,
+		opt.net,
+		"Net interface to use, either tcp or unix")
 	flagSet.String(
 		storageURL,
 		opt.storageURL,
 		"the storage driver URL you want to open")
 	flagSet.String(
-		"ocagent-addr",
+		ocAgentAddr,
 		opt.ocAgentAddr,
 		"OpenCensus Agent exporter host:address")
 }
 
 func (opt *serverOption) InitFromViper(v *viper.Viper) {
+	opt.addr = v.GetString(appAddr)
+	opt.net = v.GetString(appNet)
 	opt.storageURL = v.GetString(storageURL)
+	opt.ocAgentAddr = v.GetString(ocAgentAddr)
 }
 
 func serveCommand() *cobra.Command {
@@ -96,11 +105,14 @@ func serveCommand() *cobra.Command {
 				fmt.Println(e)
 			})
 
+			srvdriver := app.NewDefaultServer()
+			srvdriver.SetNet(srvopt.net)
 			webserver := server.New(hd, &server.Options{
 				RequestLogger: reqlog,
 				TraceExporter: oc,
-				Driver:        app.NewDefaultServer()})
+				Driver:        srvdriver})
 
+			// listen and serve our application on provided address
 			if err = webserver.ListenAndServe(srvopt.addr); err != nil {
 				return err
 			}

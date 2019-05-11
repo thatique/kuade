@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"net"
+	"errors"
 	"net/http"
 	"time"
 
@@ -10,11 +10,13 @@ import (
 )
 
 type Server struct {
+	net    string // either tcp or unix
 	server http.Server
 }
 
 func NewDefaultServer() *Server {
 	return &Server{
+		net: "tcp",
 		server: http.Server{
 			ReadTimeout:  30 * time.Second,
 			WriteTimeout: 30 * time.Second,
@@ -23,13 +25,19 @@ func NewDefaultServer() *Server {
 	}
 }
 
-func (srv *Server) ListenAndServe(addr string, h http.Handler) error {
-	host, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return err
+// SetNet set net iface for server to bind. Default is set to tcp.
+func (srv *Server) SetNet(net string) error {
+	switch net {
+	case "unix", "tcp", "":
+		srv.net = net
+		return nil
+	default:
+		return errors.New("invalid net iface")
 	}
+}
 
-	ln, err := listener.NewListener(host, port)
+func (srv *Server) ListenAndServe(addr string, h http.Handler) error {
+	ln, err := listener.NewListener(srv.net, addr)
 	if err != nil {
 		return err
 	}
