@@ -407,7 +407,7 @@ func (m *OauthProvider) GetKey() string {
 	return ""
 }
 
-// Even if user didn't have password, this records should be attached to clain
+// Even if user didn't have password, this records should be attached to claim
 // user email and username
 type Credentials struct {
 	Email      string    `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`

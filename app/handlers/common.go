@@ -9,6 +9,8 @@ import (
 
 type pageHandler struct {
 	*Context
+	// http status code
+	status int
 
 	title, description string
 
@@ -18,9 +20,6 @@ type pageHandler struct {
 func (p *pageHandler) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
 	p.Context = ctx
 
-	ctx.SetTplContext("Title", p.title)
-	ctx.SetTplContext("Description", p.description)
-
 	return handlers.MethodHandler{
 		"GET":     p,
 		"OPTIONS": p,
@@ -28,9 +27,17 @@ func (p *pageHandler) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
 }
 
 func (p *pageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p.SetTplContext("Title", p.title)
+	p.SetTplContext("Description", p.description)
 	response, ok, _ := p.Authenticate(r)
 	if ok {
 		p.SetTplContext("User", response.User)
 	}
-	p.RenderHTML(w, template.M{}, p.templates...)
+	var statusCode = http.StatusOK
+	if p.status != 0 {
+		statusCode = p.status
+	}
+	if err := p.Render(w, statusCode, template.M{}, p.templates...); err != nil {
+		panic(err)
+	}
 }

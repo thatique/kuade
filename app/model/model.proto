@@ -101,7 +101,7 @@ message OauthProvider {
     string key  = 2;
 }
 
-// Even if user didn't have password, this records should be attached to clain
+// Even if user didn't have password, this records should be attached to claim
 // user email and username
 message Credentials {
     string email = 1;

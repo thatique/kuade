@@ -99,11 +99,25 @@ func (app *App) dispatch(dsp Dispatcher) http.Handler {
 			Context: r.Context(),
 		}
 		r = r.WithContext(ctx)
-		dsp.DispatchHTTP(ctx, r)
+		dsp.DispatchHTTP(ctx, r).ServeHTTP(w, r)
 	})
 }
 
 func (app *App) registerRoutes() {
+	app.router.NotFoundHandler = &pageHandler{
+		Context: &Context{
+			App: app,
+		},
+		title:       "Not Found",
+		description: "The page you are looking for is not found",
+		templates:   []string{"base.html", "404.html"},
+		status:      http.StatusNotFound,
+	}
+	app.router.Handle("/", app.dispatch(&pageHandler{
+		title:       "Thatique - homepage",
+		description: "Thatique description",
+		templates:   []string{"base.html", "homepage.html"},
+	})).Name("home")
 	// static files
 	app.router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(handlers.NewStaticFS("assets/static", app.asset))))
