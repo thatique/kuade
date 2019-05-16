@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"io"
 	"net/http"
 
 	"github.com/thatique/kuade/pkg/iam/auth/authenticator"
@@ -52,7 +51,7 @@ func (ctx *Context) Plain(w http.ResponseWriter, code int, b []byte) error {
 
 // Render render Golang HTML template using the context already in this object
 // and extra.
-func (ctx *Context) Render(w http.ResponseWriter, code int, extra template.M, tpls ...string) error {
+func (ctx *Context) Render(w http.ResponseWriter, code int, tpls []string, extra template.M) error {
 	if ctx.tplContext != nil {
 		for k, v := range ctx.tplContext {
 			extra[k] = v

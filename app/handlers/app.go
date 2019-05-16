@@ -65,7 +65,7 @@ func NewApp(ctx context.Context, config *Config, asset func(string) ([]byte, err
 	}, isNotAPIRoute)
 	app.router.Use(webMiddlewares.Middleware)
 
-	app.registerRoutes()
+	app.registerRoutes(users)
 
 	return app, nil
 }
@@ -103,7 +103,7 @@ func (app *App) dispatch(dsp Dispatcher) http.Handler {
 	})
 }
 
-func (app *App) registerRoutes() {
+func (app *App) registerRoutes(users *storage.UserStore) {
 	app.router.NotFoundHandler = &pageHandler{
 		Context: &Context{
 			App: app,
@@ -113,15 +113,19 @@ func (app *App) registerRoutes() {
 		templates:   []string{"base.html", "404.html"},
 		status:      http.StatusNotFound,
 	}
-	app.router.Handle("/", app.dispatchFunc(
-		http.StatusOk,
-		"Thatique - homepage",
-		"Thatique description",
-		[]string{"base.html", "homepage.html"},
-	)).Name("home")
+	app.router.Handle("/", app.dispatch(&pageDispatcher{
+		status:      http.StatusOK,
+		title:       "Thatique - homepage",
+		description: "Thatique description",
+		templates:   []string{"base.html", "homepage.html"}})).Name("homepage")
 	// static files
 	app.router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(handlers.NewStaticFS("assets/static", app.asset))))
+
+	// auth
+	authRouter := app.router.PathPrefix("/auth").Subrouter()
+	authRouter.Handle("/login", app.dispatch(
+		newSigninDispatcher(auth.NewPasswordAuthenticator(users), 3, 5))).Name("auth.signin")
 }
 
 func (app *App) configureSersan() (*sersan.ServerSessionState, error) {

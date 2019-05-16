@@ -78,6 +78,6 @@ func (pswd *passwordAuthenticator) AuthenticatePassword(ctx context.Context, use
 }
 
 func runHasher(pswd string) {
-	var usr *model.Credentials
+	var usr = &model.Credentials{}
 	usr.SetPassword([]byte(pswd))
 }

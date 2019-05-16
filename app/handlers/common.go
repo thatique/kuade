@@ -7,6 +7,14 @@ import (
 	"github.com/thatique/kuade/pkg/web/template"
 )
 
+type pageDispatcher struct {
+	status int
+
+	title, description string
+
+	templates []string
+}
+
 type pageHandler struct {
 	*Context
 	// http status code
@@ -17,14 +25,18 @@ type pageHandler struct {
 	templates []string
 }
 
-func newPageDispatcher(status int, title, description string, templates []string) func(ctx *Context, r *http.Request) http.Handler {
-	return func(ctx *Context, r *http.Request) http.Handler {
-		var h = &pageHandler{status, title, description, templates}
+func (d *pageDispatcher) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
+	var h = &pageHandler{
+		Context:     ctx,
+		status:      d.status,
+		title:       d.title,
+		description: d.description,
+		templates:   d.templates,
+	}
 
-		return handlers.MethodHandler{
-			"GET":     p,
-			"OPTIONS": p,
-		}
+	return handlers.MethodHandler{
+		"GET":     h,
+		"OPTIONS": h,
 	}
 }
 
@@ -39,7 +51,7 @@ func (p *pageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if p.status != 0 {
 		statusCode = p.status
 	}
-	if err := p.Render(w, statusCode, template.M{}, p.templates...); err != nil {
+	if err := p.Render(w, statusCode, p.templates, template.M{}); err != nil {
 		panic(err)
 	}
 }

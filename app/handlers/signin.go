@@ -14,24 +14,34 @@ import (
 	"github.com/thatique/kuade/pkg/web/template"
 )
 
+type signinDispatcher struct {
+	auth    authenticator.Password
+	limiter *handlers.RateLimiter
+}
+
 type signinHandler struct {
 	*Context
 	auth    authenticator.Password
-	limiter *handlers.Ratelimiter
+	limiter *handlers.RateLimiter
 }
 
-func siginDispatcher(auth authenticator.Password, limiter *handlers.RateLimiter) func(ctx *Context, r *http.Request) http.Handler {
-	return func(ctx *Context, r *http.Request) http.Handler {
-		// if user already logged in, redirect to homepage
-		if _, ok, err := ctx.Authenticate(r); ok && err == nil {
-			return http.RedirectHandler("/", http.StatusFound)
-		}
-		var sh = &siginHandler{Context: ctx, auth: auth, limiter: limiter}
+func newSigninDispatcher(auth authenticator.Password, n, b int) *signinDispatcher {
+	return &signinDispatcher{
+		auth:    auth,
+		limiter: handlers.NewRateLimiter(n, b, httputil.GetSourceIP),
+	}
+}
 
-		return gorHandler.MethodHandler{
-			"GET":  http.HandleFunc(sh.showSigninForm),
-			"POST": http.HandleFunc(sh.postSigninForm),
-		}
+func (d *signinDispatcher) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
+	if _, ok, err := ctx.Authenticate(r); ok && err == nil {
+		return http.RedirectHandler("/", http.StatusFound)
+	}
+
+	var sh = &signinHandler{Context: ctx, auth: d.auth, limiter: d.limiter}
+
+	return gorHandler.MethodHandler{
+		"GET":  http.HandlerFunc(sh.showSigninForm),
+		"POST": http.HandlerFunc(sh.postSigninForm),
 	}
 }
 
@@ -43,7 +53,7 @@ func (h *signinHandler) templateContext(r *http.Request) {
 
 func (h *signinHandler) showSigninForm(w http.ResponseWriter, r *http.Request) {
 	h.templateContext(r)
-	h.Render(w, http.StatusOK, template.M{}, []string{"base.html", "auth/signin.html"})
+	h.Render(w, http.StatusOK, []string{"base.html", "auth/signin.html"}, template.M{})
 }
 
 func (h *signinHandler) postSigninForm(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +68,7 @@ func (h *signinHandler) postSigninForm(w http.ResponseWriter, r *http.Request) {
 	if limiter.Allow() == false {
 		h.templateContext(r)
 		h.SetTplContext("Errors", []string{http.StatusText(429)})
-		h.Render(w, http.StatusTooManyRequests, template.M, []string{"base.html", "auth/signin.html"})
+		h.Render(w, http.StatusTooManyRequests, []string{"base.html", "auth/signin.html"}, template.M{})
 		return
 	}
 
@@ -66,7 +76,7 @@ func (h *signinHandler) postSigninForm(w http.ResponseWriter, r *http.Request) {
 	if !ok || err != nil {
 		h.templateContext(r)
 		h.SetTplContext("Errors", []string{"Password atau username yang Anda masukkan keliru"})
-		h.Render(w, http.StatusUnauthorized, template.M{}, []string{"base.html", "auth/signin.html"})
+		h.Render(w, http.StatusUnauthorized, []string{"base.html", "auth/signin.html"}, template.M{})
 		return
 	}
 
