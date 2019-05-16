@@ -113,11 +113,12 @@ func (app *App) registerRoutes() {
 		templates:   []string{"base.html", "404.html"},
 		status:      http.StatusNotFound,
 	}
-	app.router.Handle("/", app.dispatch(&pageHandler{
-		title:       "Thatique - homepage",
-		description: "Thatique description",
-		templates:   []string{"base.html", "homepage.html"},
-	})).Name("home")
+	app.router.Handle("/", app.dispatchFunc(
+		http.StatusOk,
+		"Thatique - homepage",
+		"Thatique description",
+		[]string{"base.html", "homepage.html"},
+	)).Name("home")
 	// static files
 	app.router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(handlers.NewStaticFS("assets/static", app.asset))))

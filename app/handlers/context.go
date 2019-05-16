@@ -43,6 +43,13 @@ func (ctx *Context) SetTplContext(key string, val interface{}) {
 	}
 }
 
+func (ctx *Context) Plain(w http.ResponseWriter, code int, b []byte) error {
+	w.Header().Set("Content-Type", utf8PlainContentType)
+	w.WriteHeader(code)
+	_, err := w.Write(b)
+	return err
+}
+
 // Render render Golang HTML template using the context already in this object
 // and extra.
 func (ctx *Context) Render(w http.ResponseWriter, code int, extra template.M, tpls ...string) error {
@@ -51,22 +58,10 @@ func (ctx *Context) Render(w http.ResponseWriter, code int, extra template.M, tp
 			extra[k] = v
 		}
 	}
-
-	return ctx.Blob(w, code, utf8HTMLContentType, ctx.htmlRenderer(extra, tpls...))
-}
-
-func (ctx *Context) htmlRenderer(extra template.M, tpls ...string) func(w io.Writer) error {
-	return func(w io.Writer) error {
-		ctx.renderer.Render(w, extra, tpls...)
-		return nil
-	}
-}
-
-// Blob write content type and content renderer
-func (c *Context) Blob(w http.ResponseWriter, code int, contentType string, rd func(w io.Writer) error) error {
-	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Type", utf8HTMLContentType)
 	w.WriteHeader(code)
-	return rd(w)
+	ctx.renderer.Render(w, extra, tpls...)
+	return nil
 }
 
 // Authenticate authenticate request

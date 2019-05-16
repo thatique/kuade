@@ -17,12 +17,14 @@ type pageHandler struct {
 	templates []string
 }
 
-func (p *pageHandler) DispatchHTTP(ctx *Context, r *http.Request) http.Handler {
-	p.Context = ctx
+func newPageDispatcher(status int, title, description string, templates []string) func(ctx *Context, r *http.Request) http.Handler {
+	return func(ctx *Context, r *http.Request) http.Handler {
+		var h = &pageHandler{status, title, description, templates}
 
-	return handlers.MethodHandler{
-		"GET":     p,
-		"OPTIONS": p,
+		return handlers.MethodHandler{
+			"GET":     p,
+			"OPTIONS": p,
+		}
 	}
 }
 
