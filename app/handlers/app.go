@@ -124,8 +124,9 @@ func (app *App) registerRoutes(users *storage.UserStore) {
 
 	// auth
 	authRouter := app.router.PathPrefix("/auth").Subrouter()
-	authRouter.Handle("/login", app.dispatch(
+	authRouter.Handle("/", app.dispatch(
 		newSigninDispatcher(auth.NewPasswordAuthenticator(users), 3, 5))).Name("auth.signin")
+	authRouter.Handle("/logout", &signoutHandler{}).Name("auth.signout")
 }
 
 func (app *App) configureSersan() (*sersan.ServerSessionState, error) {
