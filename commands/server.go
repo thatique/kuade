@@ -9,6 +9,7 @@ import (
 	"contrib.go.opencensus.io/exporter/ocagent"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"gocloud.dev/requestlog"
 	"gocloud.dev/server"
 
@@ -79,6 +80,12 @@ func serveCommand() *cobra.Command {
 			cfg.InitFromViper(vsrv)
 			srvopt.InitFromViper(vsrv)
 
+			newProdConfig := zap.NewProductionConfig()
+			newProdConfig.Sampling = nil
+			logger, err := cfg.NewLogger(newProdConfig)
+			if err != nil {
+				return err
+			}
 			ctx := scontext.WithVersion(context.Background(), version.Version)
 			// now, open the storage URL
 			store, err := storage.OpenStorage(ctx, srvopt.storageURL)
@@ -86,7 +93,7 @@ func serveCommand() *cobra.Command {
 				return err
 			}
 
-			hd, err := handlers.NewApp(ctx, cfg, assets.Asset, store)
+			hd, err := handlers.NewApp(ctx, cfg, assets.Asset, store, logger)
 			if err != nil {
 				return err
 			}

@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/syaiful6/sersan"
+	"go.uber.org/zap"
 
 	auth "github.com/thatique/kuade/app/auth/authenticator"
 	"github.com/thatique/kuade/app/storage"
@@ -24,6 +25,7 @@ type App struct {
 
 	asset         func(string) ([]byte, error)
 	config        *Config
+	logger        *zap.Logger
 	renderer      *template.Renderer
 	router        *mux.Router
 	storage       *storage.Store
@@ -32,7 +34,7 @@ type App struct {
 
 // NewApp create Application
 func NewApp(ctx context.Context, config *Config, asset func(string) ([]byte, error),
-	storage *storage.Store) (app *App, err error) {
+	storage *storage.Store, logger *zap.Logger) (app *App, err error) {
 
 	users, err := storage.GetUserStorage()
 	if err != nil {
@@ -48,6 +50,7 @@ func NewApp(ctx context.Context, config *Config, asset func(string) ([]byte, err
 		Context:       ctx,
 		asset:         asset,
 		config:        config,
+		logger:        logger,
 		storage:       storage,
 		router:        router,
 		authenticator: appAuth,
