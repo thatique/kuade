@@ -14,5 +14,5 @@ type ResetTokenGenerator interface {
 	Create(ctx context.Context, cred *model.Credentials) (string, error)
 
 	// Check that a password reset token is correct for a given user.
-	Check(ctx context.Context, user *model.Credentials, token string) bool
+	Check(ctx context.Context, cred *model.Credentials, token string) bool
 }

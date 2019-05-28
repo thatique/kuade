@@ -10,7 +10,7 @@ import (
 
 // signputHandler logout user. The userID removed from session, and then redirect
 // back to home or the redirect target defined in query string.
-type signoutHandler struct {}
+type signoutHandler struct{}
 
 func (h *signoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := authenticator.Logout(r); err != nil {
