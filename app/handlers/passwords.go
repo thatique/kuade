@@ -22,26 +22,30 @@ const (
 )
 
 type passwordsDispatcher struct {
-	broker *passwords.Broker
+	broker  *passwords.Broker
 	limiter *handlers.RateLimiter
 }
 
 type passwordsHandler struct {
 	*Context
-	broker *passwords.Broker
+	broker  *passwords.Broker
 	limiter *handlers.RateLimiter
 	request *passwords.Request
+}
+
+func newPasswordsDispatcher(broker *passwords.Broker, n, b int) *passwordsDispatcher {
+	return &passwordsDispatcher{broker: broker, limiter: handlers.NewRateLimiter(n, b, httputil.GetSourceIP),}
 }
 
 func (p *passwordsDispatcher) dispatchResetLink(ctx *Context, r *http.Request) http.Handler {
 	h := passwordsHandler{
 		Context: ctx,
-		broker: p.broker,
+		broker:  p.broker,
 		limiter: p.limiter,
 	}
 
 	return gorHandler.MethodHandler{
-		"GET": http.HandlerFunc(h.renderResetLink),
+		"GET":  http.HandlerFunc(h.renderResetLink),
 		"POST": http.HandlerFunc(h.sendResetLink),
 	}
 }
@@ -66,21 +70,21 @@ func (p *passwordsDispatcher) dispatchResetPassword(ctx *Context, r *http.Reques
 		if !ok {
 			// it's not valid request
 			return pageHandler{
-				Context: ctx,
-				status: http.StatusForbidden,
-				title: "403 Forbidden",
+				Context:     ctx,
+				status:      http.StatusForbidden,
+				title:       "403 Forbidden",
 				Description: "Invalid URL",
-				templates: []string{"base.html", "403.html"},
+				templates:   []string{"base.html", "403.html"},
 			}
 		}
 		h := passwordsHandler{
 			Context: ctx,
-			broker: p.broker,
+			broker:  p.broker,
 			limiter: p.limiter,
 			request: req,
 		}
 		return gorHandler.MethodHandler{
-			"GET": http.HandlerFunc(h.renderChangePassword),
+			"GET":  http.HandlerFunc(h.renderChangePassword),
 			"POST": http.HandlerFunc(h.changePassword),
 		}
 	}
@@ -123,7 +127,7 @@ func (h *passwordsHandler) sendResetLink(w http.ResponseWriter, r *http.Request)
 	if !limiter.Allow() {
 		h.Render(w, http.StatusTooManyRequests, []string{"base.html", "auth/password_reset_form.html"}, template.M{
 			"Errors": []string{http.StatusText(429)},
-			"Email": "",
+			"Email":  "",
 		})
 		return
 	}
@@ -132,15 +136,15 @@ func (h *passwordsHandler) sendResetLink(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		h.Render(w, http.StatusBadRequest, []string{"base.html", "auth/password_reset_form.html"}, template.M{
 			"Errors": []string{err.Error()},
-			"Email": r.FormValue("email"),
+			"Email":  r.FormValue("email"),
 		})
 		return
 	}
 
 	// success
 	h.Render(w, http.StatusOK, []string{"base.html", "auth/password_reset_form.html"}, template.M{
-		"Errors": []string{"Password reset sudah terkirim ke inbox anda"}
-		"Email": "",
+		"Errors": []string{"Password reset sudah terkirim ke inbox anda"},
+		"Email":  "",
 	})
 }
 
@@ -156,7 +160,7 @@ func (h *passwordsHandler) changePassword(w http.ResponseWriter, r *http.Request
 	if errCode := r.broker.Resets(r.Context(), p.request); errCode != passwords.NoError {
 		h.templateContext(false, r)
 		h.Render(w, http.StatusBadRequest, []string{"base.html", "auth/password_reset_form.html"}, template.M{
-			"Errors": []string{errCode.ErrorDescription()}
+			"Errors": []string{errCode.ErrorDescription()},
 		})
 		return
 	}
