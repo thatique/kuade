@@ -76,8 +76,8 @@ func serveCommand() *cobra.Command {
 		Long:  "serve is used to start kuade application server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// initialize
-			storage.DefaultURLMux().InitFromViper(vsrv)
 			cfg.InitFromViper(vsrv)
+			storage.DefaultURLMux().InitFromViper(vsrv)
 			srvopt.InitFromViper(vsrv)
 
 			newProdConfig := zap.NewProductionConfig()

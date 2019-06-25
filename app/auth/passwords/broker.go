@@ -29,6 +29,19 @@ const (
 	ErrUpstream
 )
 
+func (code ErrorCode) ErrorDescription() string {
+	switch code {
+	case NoError:
+		return "No Error"
+	case ErrPassNotMatch:
+		return "password and password confirmation not match"
+	case ErrMinimumPassword:
+		return "minimum password length is 8 chars"
+	default:
+		return "unknown error"
+	}
+}
+
 type Broker struct {
 	ResetURL string
 	Sender   string
@@ -41,7 +54,12 @@ type Broker struct {
 
 type Request struct {
 	creds                       *model.Credentials
+	user                        *model.User
 	token, Password1, Password2 string
+}
+
+func (r *Request) GetUser() *model.User {
+	return r.user
 }
 
 func New(tokens driver.ResetTokenGenerator, users *storage.UserStore) *Broker {
@@ -127,6 +145,7 @@ func (b *Broker) ValidateReset(ctx context.Context, uid, token string) (req *Req
 
 	req = &Request{
 		creds: creds,
+		user:  user,
 		token: token,
 	}
 	ok = true
@@ -157,7 +176,7 @@ func (b *Broker) composeEmail(ctx context.Context, creds *model.Credentials, tpl
 	h.Set("From", h.Sender)
 	h.Set("To", creds.GetEmail())
 	h.Set("Subject", "[Thatique.com] Reset Password")
-	h.Set("Content-Type", fmt.Sprintf("multipart/alternative; boundary=%", boundary.String()))
+	h.Set("Content-Type", fmt.Sprintf("multipart/alternative; boundary=%s", boundary.String()))
 	msg, _ := message.NewMultipart(h, []*message.Entity{e1, e2})
 
 	return msg

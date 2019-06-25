@@ -65,7 +65,7 @@ func (h *signinHandler) postSigninForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	limiter := h.limiter.Get(r)
-	if limiter.Allow() == false {
+	if !limiter.Allow() {
 		h.templateContext(r)
 		h.SetTplContext("Errors", []string{http.StatusText(429)})
 		h.Render(w, http.StatusTooManyRequests, []string{"base.html", "auth/signin.html"}, template.M{})
